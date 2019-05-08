@@ -207,6 +207,15 @@ export default {
                 physic: physic
             };
             this.$store.commit("experiment/UPDATE_MESH_PHYSICS", meshPhysic);
+            var meshLog = {
+                mesh: this.mesh,
+                log: {
+                    name: "Dodana fizika",
+                    icon: "fas fa-atom",
+                    description: `(${physic.name})`
+                }
+            };
+            this.$store.commit("experiment/UPDATE_MESH_LOGS", meshLog);
             this.isModalActive = false;
             babylon.addPhysic(this.getMeshByName(this.mesh), physic);
         },
@@ -240,7 +249,10 @@ export default {
                         mesh: this.mesh,
                         physic: physic
                     };
-                    this.$store.commit("experiment/REMOVE_MESH_PHYSIC", meshPhysic);
+                    this.$store.commit(
+                        "experiment/REMOVE_MESH_PHYSIC",
+                        meshPhysic
+                    );
                 }
             }
         }

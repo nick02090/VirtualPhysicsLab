@@ -32,7 +32,8 @@ const types = {
     UPDATE_MESH_PHYSICS: "UPDATE_MESH_PHYSICS",
     REMOVE_MESH_PHYSIC: "REMOVE_MESH_PHYSIC",
 
-    UPDATE_LOGS: "UPDATE_LOGS"
+    UPDATE_LOGS: "UPDATE_LOGS",
+    UPDATE_MESH_LOGS: "UPDATE_MESH_LOGS"
 }
 
 const state = {
@@ -123,6 +124,10 @@ const mutations = {
 
     [types.UPDATE_LOGS](state, data) {
         state.logs.push(data)
+    },
+    [types.UPDATE_MESH_LOGS](state, data) {
+        var meshLog = state.logs.find(x => x.name === data.mesh).log;
+        meshLog.push(data.log);
     }
 }
 

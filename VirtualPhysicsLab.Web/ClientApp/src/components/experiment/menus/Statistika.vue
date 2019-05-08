@@ -23,13 +23,15 @@
 
                 <template slot-scope="props">
                     <b-table-column field="name">
-                        <a @click="logInfo">
-                            <span class="icon">
-                                <i :class="props.row.icon"></i>
-                            </span>
-                            {{ props.row.name }}
-                            {{ props.row.description }}
-                        </a>
+                        <b-tooltip label="Detalji" type="is-black">
+                            <a @click="logInfo">
+                                <span class="icon">
+                                    <i :class="props.row.icon"></i>
+                                </span>
+                                {{ props.row.name }}
+                                {{ props.row.description }}
+                            </a>
+                        </b-tooltip>
                     </b-table-column>
                 </template>
 
@@ -56,14 +58,7 @@ export default {
     name: "Statistika",
     data() {
         return {
-            mesh: null,
-            log: [
-                {
-                    name: "Brzina",
-                    icon: "fas fa-running",
-                    description: "(3 m/s) x-os"
-                }
-            ]
+            mesh: null
         };
     },
     beforeDestroy() {
@@ -95,6 +90,9 @@ export default {
             set: function(mesh) {
                 this.mesh = mesh;
             }
+        },
+        log() {
+            return this.getMeshLog(this.mesh);
         }
     },
     methods: {

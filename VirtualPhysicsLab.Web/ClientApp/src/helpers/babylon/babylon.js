@@ -37,6 +37,20 @@ export default {
             physic: []
         }
         store.commit("experiment/UPDATE_PHYSICS", physic);
+        var log = {
+            name: properties.name,
+            log: []
+        }
+        store.commit("experiment/UPDATE_LOGS", log);
+        var createLog = {
+            mesh: properties.name,
+            log: {
+                name: "Stvoren element",
+                icon: "fas fa-box-open",
+                description: ` (${properties.name})`
+            }
+        }
+        store.commit("experiment/UPDATE_MESH_LOGS", createLog)
         store.commit("experiment/UPDATE_MESHES", newMesh.name);
         return newMesh;
     },

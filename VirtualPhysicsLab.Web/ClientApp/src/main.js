@@ -5,6 +5,7 @@ import 'buefy/dist/buefy.css'
 import Babylon from 'babylonjs'
 import router from './router'
 import store from './store/index.js'
+import VeeValidate from 'vee-validate'
 
 Vue.config.productionTip = false
 
@@ -13,6 +14,8 @@ Vue.use(Buefy, {
 });
 
 Vue.use(Babylon);
+
+Vue.use(VeeValidate);
 
 new Vue({
   router,

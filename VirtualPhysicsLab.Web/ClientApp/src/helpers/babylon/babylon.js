@@ -47,6 +47,7 @@ export default {
             log: {
                 name: "Stvoren element",
                 icon: "fas fa-box-open",
+                type: "life",
                 description: ` (${properties.name})`
             }
         }

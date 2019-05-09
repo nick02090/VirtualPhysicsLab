@@ -63,5 +63,6 @@ section.hero {
     top: 15px !important;
     right: 15px !important;
     cursor: pointer;
+    z-index: 100;
 }
 </style>

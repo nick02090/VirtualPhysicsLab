@@ -109,6 +109,8 @@ export default {
                     x => x.name == menuData.menuName
                 );
                 this.isMenu = false;
+            } else {
+                this.isMenu = true;
             }
         },
         notification(msg) {

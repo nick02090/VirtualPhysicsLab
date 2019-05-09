@@ -212,6 +212,7 @@ export default {
                 log: {
                     name: "Dodana fizika",
                     icon: "fas fa-atom",
+                    type: "physics",
                     description: `(${physic.name})`
                 }
             };

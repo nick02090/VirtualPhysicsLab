@@ -18,6 +18,20 @@
                 </div>
             </b-field>
 
+            <b-field horizontal label="Praćenja">
+                <b-tooltip label="Uključi/Isključi sva praćenja." type="is-black">
+                    <b-switch @input="globalSelection" v-model="all"></b-switch>
+                </b-tooltip>
+            </b-field>
+
+            <b-field grouped group-multiline>
+                <div class="control" v-for="(log, index) in logs" :key="index">
+                    <b-tooltip :label="log.description" type="is-black">
+                        <b-checkbox v-model="log.visible">{{log.name}}</b-checkbox>
+                    </b-tooltip>
+                </div>
+            </b-field>
+
             <b-table :data="log" hoverable paginated :per-page="5">
                 <template slot="header">Povijest nadzora</template>
 
@@ -58,7 +72,46 @@ export default {
     name: "Statistika",
     data() {
         return {
-            mesh: null
+            mesh: null,
+            all: false,
+            logs: [
+                {
+                    name: "Životni ciklus",
+                    type: "life",
+                    description: "Stvaranje i kreiranje elementa.",
+                    visible: false
+                },
+                {
+                    name: "Fizika",
+                    type: "physics",
+                    description: "Fizička svojstva elementa.",
+                    visible: false
+                },
+                {
+                    name: "Sudari",
+                    type: "collisions",
+                    description: "Interakcija s drugim elementima.",
+                    visible: false
+                },
+                {
+                    name: "Rotacija",
+                    type: "rotation",
+                    description: "Promjene smjera elementa.",
+                    visible: false
+                },
+                {
+                    name: "Pomak",
+                    type: "movement",
+                    description: "Kretnja elementa po sceni.",
+                    visible: false
+                },
+                {
+                    name: "Sila",
+                    type: "forces",
+                    description: "Sile koje djeluju na element.",
+                    visible: false
+                }
+            ]
         };
     },
     beforeDestroy() {
@@ -92,10 +145,30 @@ export default {
             }
         },
         log() {
-            return this.getMeshLog(this.mesh);
+            var allLogs = this.getMeshLog(this.mesh);
+            var filtered = [];
+            var selected = this.logs.filter(x => x.visible);
+            for (var i in allLogs) {
+                for (var j in selected) {
+                    if (allLogs[i].type === selected[j].type) {
+                        filtered.push(allLogs[i]);
+                    }
+                }
+            }
+            if (selected.length < this.logs.length) {
+                this.all = false;
+            } else if (selected.length == this.logs.length) {
+                this.all = true;
+            }
+            return filtered;
         }
     },
     methods: {
+        globalSelection(value) {
+            for (var i in this.logs) {
+                this.logs[i].visible = value;
+            }
+        },
         logInfo() {
             console.log("will open modal with details");
         },

@@ -185,8 +185,7 @@ export default {
             );
 
             this.$emit("changeMenu", {
-                groupName: "Općenito",
-                menuName: "Uredi element"
+                groupName: "Općenito"
             });
         },
         notification(msg) {

@@ -19,14 +19,18 @@
             </b-field>
 
             <b-field horizontal label="Praćenja">
-                <b-tooltip label="Uključi/Isključi sva praćenja." type="is-black">
+                <b-tooltip
+                    label="Uključi/Isključi sva praćenja."
+                    type="is-black"
+                    position="is-right"
+                >
                     <b-switch @input="globalSelection" v-model="all"></b-switch>
                 </b-tooltip>
             </b-field>
 
             <b-field grouped group-multiline>
                 <div class="control" v-for="(log, index) in logs" :key="index">
-                    <b-tooltip :label="log.description" type="is-black">
+                    <b-tooltip :label="log.description" type="is-black" position="is-right">
                         <b-checkbox v-model="log.visible">{{log.name}}</b-checkbox>
                     </b-tooltip>
                 </div>
@@ -52,7 +56,7 @@
                 <template slot="empty">
                     <section class="section">
                         <div class="content has-text-grey has-text-centered">
-                            <p>Ne postoji povijest nadzora odabranog elementa.</p>
+                            <p>Ne postoji povijest nadzora odabranog elementa uz odabrane filtere.</p>
                         </div>
                     </section>
                 </template>
@@ -75,12 +79,6 @@ export default {
             mesh: null,
             all: false,
             logs: [
-                {
-                    name: "Životni ciklus",
-                    type: "life",
-                    description: "Stvaranje i kreiranje elementa.",
-                    visible: false
-                },
                 {
                     name: "Fizika",
                     type: "physics",

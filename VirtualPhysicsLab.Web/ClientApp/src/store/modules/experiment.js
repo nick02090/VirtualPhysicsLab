@@ -20,13 +20,18 @@ const getters = {
 
 const types = {
     SET_SCENE: "SET_SCENE",
+    SET_AXIS: "SET_AXIS",
     UPDATE_MESHES: "UPDATE_MESHES",
+    DELETE_MESH: "DELETE_MESH",
     SET_HIGHLIGHT: "SET_HIGHLIGHT",
     SET_LIGHT: "SET_LIGHT",
     SET_CAMERA: "SET_CAMERA",
     SET_GROUND: "SET_GROUND",
     SET_CANVAS: "SET_CANVAS",
+
+    SET_PHYSICS_IMPOSTOR: "SET_PHYSICS_IMPOSTOR",
     SET_DRAG_BEHAVIOUR: "SET_DRAG_BEHAVIOUR",
+    SET_LAST_POSITION: "SET_LAST_POSITION",
 
     UPDATE_PHYSICS: "UPDATE_PHYSICS",
     UPDATE_MESH_PHYSICS: "UPDATE_MESH_PHYSICS",
@@ -38,13 +43,17 @@ const types = {
 
 const state = {
     scene: null,
+    axis: [],
     meshes: [],
     highlight: null,
     light: null,
     camera: null,
     ground: null,
     canvas: null,
+
     dragBehaviour: [],
+    physicsImpostor: null,
+    lastPosition: null,
 
     physics: [],
 
@@ -55,8 +64,16 @@ const mutations = {
     [types.SET_SCENE](state, data) {
         state.scene = data;
     },
+    [types.SET_AXIS](state, data) {
+        state.axis = data
+    },
     [types.UPDATE_MESHES](state, data) {
         state.meshes.push(data)
+    },
+    [types.DELETE_MESH](state, data) {
+        var allMeshes = state.meshes;
+        var meshes = allMeshes.filter(x => x != data);
+        state.meshes = meshes;
     },
     [types.SET_HIGHLIGHT](state, data) {
         state.highlight = data
@@ -73,8 +90,15 @@ const mutations = {
     [types.SET_CANVAS](state, data) {
         state.canvas = data
     },
+
+    [types.SET_PHYSICS_IMPOSTOR](state, data) {
+        state.physicsImpostor = data;
+    },
     [types.SET_DRAG_BEHAVIOUR](state, data) {
         state.dragBehaviour = data
+    },
+    [types.SET_LAST_POSITION](state, data) {
+        state.lastPosition = data;
     },
 
     [types.UPDATE_PHYSICS](state, data) {

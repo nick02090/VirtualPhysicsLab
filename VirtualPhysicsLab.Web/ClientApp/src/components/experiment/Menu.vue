@@ -34,14 +34,12 @@
                             </p>
                             <p class="menu-label">{{activeMenu.name}}</p>
                         </div>
-                        <keep-alive>
-                            <component
-                                :is="activeMenu.component"
-                                @changeMenu="changeMenu"
-                                @notification="notification"
-                                @error="error"
-                            ></component>
-                        </keep-alive>
+                        <component
+                            :is="activeMenu.component"
+                            @changeMenu="changeMenu"
+                            @notification="notification"
+                            @error="error"
+                        ></component>
                     </span>
                 </p>
             </transition>
@@ -52,6 +50,7 @@
 <script>
 import NoviElement from "@/components/experiment/menus/NoviElement.vue";
 import UrediElement from "@/components/experiment/menus/UrediElement.vue";
+import RadnoOkruzenje from "@/components/experiment/menus/RadnoOkruzenje.vue";
 import FizikaElementa from "@/components/experiment/menus/FizikaElementa.vue";
 import Statistika from "@/components/experiment/menus/Statistika.vue";
 
@@ -75,6 +74,10 @@ export default {
                         {
                             name: "Uredi element",
                             component: UrediElement
+                        },
+                        {
+                            name: "Radno okruženje",
+                            component: RadnoOkruzenje
                         }
                     ]
                 },
@@ -97,6 +100,7 @@ export default {
     components: {
         NoviElement,
         UrediElement,
+        RadnoOkruzenje,
         FizikaElementa,
         Statistika
     },
@@ -109,8 +113,6 @@ export default {
                     x => x.name == menuData.menuName
                 );
                 this.isMenu = false;
-            } else {
-                this.isMenu = true;
             }
         },
         notification(msg) {

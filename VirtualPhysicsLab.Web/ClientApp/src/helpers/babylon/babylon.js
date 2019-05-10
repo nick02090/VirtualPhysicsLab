@@ -6,121 +6,107 @@ export default {
     toggleHighlight(obj) {
         mesh.toggleHightlight(obj);
     },
-    addDragBehaviour(obj, axis) {
-        var canvas = store.state.experiment.canvas;
-        var camera = store.state.experiment.camera;
-        camera.detachControl(canvas);
-
-        var dragBehaviours = store.state.experiment.dragBehaviour;
-        this.removeDragBehaviours(obj);
-        var dragBehaviour = dragBehaviours[axis];
-        obj.addBehavior(dragBehaviour);
+    addDragBehaviour(obj, axis, first) {
+        mesh.addDragBehaviour(obj, axis, first);
     },
     removeDragBehaviours(obj, permanent) {
-        var dragBehaviours = store.state.experiment.dragBehaviour;
-        dragBehaviours.forEach(dragBehaviour => {
-            obj.removeBehavior(dragBehaviour);
-        })
-
-        if (permanent === true) {
-            var canvas = store.state.experiment.canvas;
-            var camera = store.state.experiment.camera;
-            camera.attachControl(canvas, true);
-        }
+        mesh.removeDragBehaviours(obj, permanent);
     },
     addMesh(type, properties, material, scene) {
-        var newMesh = mesh.create(type, properties, material, scene);
-        this.addMeshLabel(newMesh);
-        this.enableWallRestrictions(newMesh);
-        var physic = {
-            name: properties.name,
-            physic: []
-        }
-        store.commit("experiment/UPDATE_PHYSICS", physic);
-        var log = {
-            name: properties.name,
-            log: []
-        }
-        store.commit("experiment/UPDATE_LOGS", log);
-        var createLog = {
-            mesh: properties.name,
-            log: {
-                name: "Stvoren element",
-                icon: "fas fa-box-open",
-                type: "life",
-                description: ` (${properties.name})`
-            }
-        }
-        store.commit("experiment/UPDATE_MESH_LOGS", createLog)
-        store.commit("experiment/UPDATE_MESHES", newMesh.name);
-        return newMesh;
+        return mesh.create(type, properties, material, scene);
     },
     addPhysic(obj, physic) {
         physics.addPhysic(obj, physic);
     },
-    enableWallRestrictions(mesh) {
-        var scene = store.state.experiment.scene;
-        var ground = store.state.experiment.ground;
-
-        var groundSize = ground.getBoundingInfo().boundingBox.extendSize;
-        var meshSize = mesh.getBoundingInfo().boundingBox.extendSize;
-
-        var north = groundSize.x - meshSize.x;
-        var south = -north;
-        var east = groundSize.z - meshSize.z;
-        var west = -east;
-
-        var floor = 0;
-
-        scene.registerBeforeRender(function () {
-            if (mesh.position.x > north) {
-                mesh.position.x = north;
-                mesh.position.y = floor;
-            }
-            if (mesh.position.x < south) {
-                mesh.position.x = south;
-                mesh.position.y = floor;
-            }
-            if (mesh.position.z > east) {
-                mesh.position.z = east;
-                mesh.position.y = floor;
-            }
-            if (mesh.position.z < west) {
-                mesh.position.z = west;
-                mesh.position.y = floor;
-            }
-        })
+    checkCollisions(obj, name) {
+        return mesh.checkCollisions(obj, name);
     },
-    addMeshLabel(mesh) {
-        var plane = this.makeTextPlane(mesh.name, "white", 1);
-        plane.position.y = mesh.position.y + mesh.scaling.y + 1;
-        plane.parent = mesh;
+    setMeshToLastPosition(obj) {
+        mesh.setMeshToLastPosition(obj);
     },
-    makeTextPlane(text, color, size) {
+    deleteMesh(obj, name) {
+        mesh.delete(obj, name);
+    },
+    showAxis() {
         var scene = store.state.experiment.scene;
-        var dynamicTexture = new BABYLON.DynamicTexture("DynamicTexture", 50, scene, true);
-        dynamicTexture.hasAlpha = true;
-        dynamicTexture.drawText(text, 0, 40, "20px Arial", color, "transparent", true);
-        var plane = new BABYLON.Mesh.CreatePlane("TextPlane", size, scene, true);
-        plane.material = new BABYLON.StandardMaterial("TextPlaneMaterial", scene);
-        plane.material.backFaceCulling = false;
-        plane.material.specularColor = new BABYLON.Color3(0, 0, 0);
-        plane.material.diffuseTexture = dynamicTexture;
-        return plane;
+        var start = new BABYLON.Vector3(-10, -1, -10);
+        this.createAxis(start, 5, scene);
+    },
+    removeAxis() {
+        var axis = store.state.experiment.axis;
+        for (var i in axis) {
+            var line = axis[i].axis;
+            var char = axis[i].char;
+            line.dispose();
+            char.dispose();
+        }
+        store.commit("experiment/SET_AXIS", []);
+    },
+    createAxis(start, size, scene) {
+        var makeTextPlane = function (text, color, size, scene) {
+            var dynamicTexture = new BABYLON.DynamicTexture("DynamicTexture", 50, scene, true);
+            dynamicTexture.hasAlpha = true;
+            dynamicTexture.drawText(text, 5, 40, "bold 36px Arial", color, "transparent", true);
+            var plane = new BABYLON.Mesh.CreatePlane("TextPlane", size, scene, true);
+            plane.material = new BABYLON.StandardMaterial("TextPlaneMaterial", scene);
+            plane.material.backFaceCulling = false;
+            plane.material.specularColor = new BABYLON.Color3(0, 0, 0);
+            plane.material.diffuseTexture = dynamicTexture;
+            return plane;
+        };
+
+        var axisX = BABYLON.Mesh.CreateLines("axisX", [
+            start, new BABYLON.Vector3(start.x + size, start.y + 0, start.z + 0), new BABYLON.Vector3(start.x + size * 0.95, start.y + 0.05 * size, start.z + 0),
+            new BABYLON.Vector3(start.x + size, start.y + 0, start.z + 0), new BABYLON.Vector3(start.x + size * 0.95, start.y + -0.05 * size, start.z + 0)
+        ], scene);
+        axisX.color = new BABYLON.Color3(1, 0, 0);
+        var xChar = makeTextPlane("X", "red", size / 10, scene);
+        xChar.position = new BABYLON.Vector3(start.x + 0.9 * size, start.y + 0.05 * size, start.z + 0);
+
+        var axisY = BABYLON.Mesh.CreateLines("axisY", [
+            start, new BABYLON.Vector3(start.x + 0, start.y + size, start.z + 0), new BABYLON.Vector3(start.x + -0.05 * size, start.y + size * 0.95, start.z + 0),
+            new BABYLON.Vector3(start.x + 0, start.y + size, start.z + 0), new BABYLON.Vector3(start.x + 0.05 * size, start.y + size * 0.95, start.z + 0)
+        ], scene);
+        axisY.color = new BABYLON.Color3(0, 1, 0);
+        var yChar = makeTextPlane("Y", "green", size / 10, scene);
+        yChar.position = new BABYLON.Vector3(start.x + 0, start.y + 0.9 * size, start.z + -0.05 * size);
+
+        var axisZ = BABYLON.Mesh.CreateLines("axisZ", [
+            start, new BABYLON.Vector3(start.x + 0, start.y + 0, start.z + size), new BABYLON.Vector3(start.x + 0, start.y + -0.05 * size, start.z + size * 0.95),
+            new BABYLON.Vector3(start.x + 0, start.y + 0, start.z + size), new BABYLON.Vector3(start.x + 0, start.y + 0.05 * size, start.z + size * 0.95)
+        ], scene);
+        axisZ.color = new BABYLON.Color3(0, 0, 1);
+        var zChar = makeTextPlane("Z", "blue", size / 10, scene);
+        zChar.position = new BABYLON.Vector3(start.x + 0, start.y + 0.05 * size, start.z + 0.9 * size);
+
+        var x = {
+            axis: axisX,
+            char: xChar
+        };
+        var y = {
+            axis: axisY,
+            char: yChar
+        };
+        var z = {
+            axis: axisZ,
+            char: zChar
+        };
+        var axis = [x, y, z];
+        store.commit("experiment/SET_AXIS", axis);
     },
     createEmptyScene(canvas, engine) {
         var scene = new BABYLON.Scene(engine);
 
         var camera = new BABYLON.ArcRotateCamera(
             "camera",
-            Math.PI / 2,
-            Math.PI / 4,
-            3,
+            0,
+            0,
+            30,
             BABYLON.Vector3.Zero(),
             scene
         );
         camera.attachControl(canvas, true);
-        camera.setPosition(new BABYLON.Vector3(15, 20, 15));
+        camera.setPosition(new BABYLON.Vector3(10, 6, -20));
         camera.lowerRadiusLimit = 15;
         camera.upperRadiusLimit = 35;
         camera.wheelDeltaPercentage = 0.01;
@@ -175,6 +161,9 @@ export default {
         });
         zDragBehaviour.useObjectOrienationForDragging = false;
         store.commit("experiment/SET_DRAG_BEHAVIOUR", [xDragBehaviour, yDragBehaviour, zDragBehaviour]);
+
+        var start = new BABYLON.Vector3(-10, -1, -10);
+        this.createAxis(start, 5, scene);
 
         return scene;
     }

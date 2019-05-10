@@ -3,7 +3,7 @@
         <b-field label="Orijentacija" horizontal>
             <div class="block">
                 <b-radio v-model="axis" :native-value="0">x</b-radio>
-                <b-radio v-model="axis" :native-value="2">y</b-radio>
+                <b-radio v-model="axis" :native-value="2">z</b-radio>
             </div>
         </b-field>
         <b-field label="Vrijednost" horizontal :type="errors.has('velocity') ? 'is-danger' : ''">
@@ -35,7 +35,7 @@ export default {
             let isValid = await this.validate();
             if (!isValid) return;
 
-            var axisString = this.axis === 0 ? "x" : "y";
+            var axisString = this.axis === 0 ? "x" : "z";
 
             var physic = {
                 name: "Brzina",
@@ -44,7 +44,7 @@ export default {
                 properties: {
                     value: this.velocity,
                     axis: this.axis,
-                    axisString: axisString === "y" ? "z" : axisString,
+                    axisString: axisString,
                     unit: "m/s"
                 }
             };

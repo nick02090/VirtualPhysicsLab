@@ -63,13 +63,11 @@
                     </div>
                 </header>
                 <section class="modal-card-body">
-                    <keep-alive>
-                        <component
-                            :is="selectedPhysic.component"
-                            ref="physic"
-                            @addPhysic="updatePhysics"
-                        ></component>
-                    </keep-alive>
+                    <component
+                        :is="selectedPhysic.component"
+                        ref="physic"
+                        @addPhysic="updatePhysics"
+                    ></component>
                 </section>
                 <footer class="modal-card-foot">
                     <button class="button" type="button" @click="isModalActive = false">Odustani</button>
@@ -220,6 +218,13 @@ export default {
             this.isModalActive = false;
             babylon.addPhysic(this.getMeshByName(this.mesh), physic);
         },
+        removePhysics(physic) {
+            var meshPhysic = {
+                mesh: this.mesh,
+                physic: physic
+            };
+            this.$store.commit("experiment/REMOVE_MESH_PHYSIC", meshPhysic);
+        },
         notification(msg) {
             this.$emit("notification", msg);
         },
@@ -246,14 +251,27 @@ export default {
                     x => x.name === "Brzina" && x.properties.axis === 0
                 );
                 if (physic) {
-                    var meshPhysic = {
-                        mesh: this.mesh,
-                        physic: physic
-                    };
-                    this.$store.commit(
-                        "experiment/REMOVE_MESH_PHYSIC",
-                        meshPhysic
-                    );
+                    this.removePhysics(physic);
+                }
+            }
+        },
+        "meshPhysic.velocity.y": function(newVelocity, oldVelocity) {
+            if (newVelocity === 0) {
+                var physic = this.physic.find(
+                    x => x.name === "Brzina" && x.properties.axis === 1
+                );
+                if (physic) {
+                    this.removePhysics(physic);
+                }
+            }
+        },
+        "meshPhysic.velocity.z": function(newVelocity, oldVelocity) {
+            if (newVelocity === 0) {
+                var physic = this.physic.find(
+                    x => x.name === "Brzina" && x.properties.axis === 2
+                );
+                if (physic) {
+                    this.removePhysics(physic);
                 }
             }
         }

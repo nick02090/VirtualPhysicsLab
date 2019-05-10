@@ -19,14 +19,17 @@
             </b-field>
             <div class="field">
                 <label class="label">Postavke</label>
-                <b-switch v-model="isDrag" @input="switchDrag">Pomakni</b-switch>
+                <b-tooltip v-if="hasCollisions && isDrag" type="is-black" label="Postoje kolizije!">
+                    <b-switch v-model="isDrag" disabled>Pomakni</b-switch>
+                </b-tooltip>
+                <b-switch v-else v-model="isDrag" @input="switchDrag">Pomakni</b-switch>
                 <div class="block">
                     <b-radio v-model="axis" :native-value="0">x</b-radio>
-                    <b-radio v-model="axis" :native-value="2">y</b-radio>
-                    <b-radio v-model="axis" :native-value="1">z</b-radio>
+                    <b-radio v-model="axis" :native-value="1">y</b-radio>
+                    <b-radio v-model="axis" :native-value="2">z</b-radio>
                 </div>
                 <div class="field">
-                    <label class="label">Rotacija (os Z)</label>
+                    <label class="label">Rotacija (os Y)</label>
                     <b-field>
                         <b-field>
                             <b-tooltip label="Stupnjevi" type="is-black">
@@ -85,6 +88,7 @@ export default {
     data() {
         return {
             isDrag: false,
+            hasCollisions: false,
             axis: 0,
             mesh: null,
             rotation: {
@@ -94,13 +98,19 @@ export default {
             }
         };
     },
-    created() {
+    mounted() {
         setInterval(() => {
             this.setDMS();
+        }, 1);
+        setInterval(() => {
+            this.checkCollisions();
         }, 1);
     },
     beforeDestroy() {
         if (this.isDrag) {
+            if (this.hasCollisions) {
+                babylon.setMeshToLastPosition(this.getMeshByName(this.mesh));
+            }
             this.switchDrag();
         }
         if (this.mesh) {
@@ -183,18 +193,27 @@ export default {
             var pi = Math.PI;
             return degrees * (180 / pi);
         },
+        checkCollisions() {
+            if (this.isDrag) {
+                this.hasCollisions = babylon.checkCollisions(
+                    this.getMeshByName(this.mesh),
+                    this.mesh
+                );
+            }
+        },
         switchDrag(value) {
-            var msg = "Pomicanje kamere je trenutno onemogućeno.";
+            var msg = `Fizika tijela (${this.mesh}) je isključena.`;
             if (!value) {
                 babylon.removeDragBehaviours(
                     this.getMeshByName(this.mesh),
                     true
                 );
-                msg = "Pomicanje kamere je omogućeno.";
+                msg = `Fizika djeluje na tijelo (${this.mesh}).`;
             } else {
                 babylon.addDragBehaviour(
                     this.getMeshByName(this.mesh),
-                    this.axis
+                    this.axis,
+                    true
                 );
             }
             this.notification(msg);

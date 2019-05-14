@@ -24,17 +24,17 @@
             </div>
         </div>
         <div class="field">
-            <label class="label">Postavke</label>
+            <label class="label">Faktor trenja</label>
             <b-tooltip type="is-black" label="Faktor trenja podloge" position="is-right">
-                <b-field :type="errors.has('friction') ? 'is-danger' : ''">
-                    <b-input
-                        placeholder="Faktor trenja"
+                <b-field>
+                    <b-numberinput
+                        :step="0.01"
                         v-model="friction"
-                        icon="weight-hanging"
-                        name="friction"
-                        v-validate="'required|decimal|min_value:0'"
-                        expanded
-                    ></b-input>
+                        :min="0"
+                        controls-position="compact"
+                        controls-rounded
+                        type="is-success"
+                    ></b-numberinput>
                 </b-field>
             </b-tooltip>
         </div>

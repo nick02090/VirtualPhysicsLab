@@ -13,7 +13,9 @@ const getters = {
     },
     getMeshLog(state) {
         return (name) => {
-            return state.logs.find(x => x.name === name).log;
+            var meshLog = state.logs.find(x => x.name === name);
+            if (meshLog === undefined) return [];
+            return meshLog.log;
         }
     }
 }
@@ -43,6 +45,7 @@ const types = {
     DELETE_MESH_PHYSICS: "DELETE_MESH_PHYSICS",
 
     UPDATE_LOGS: "UPDATE_LOGS",
+    SET_MESH_LOGS: "SET_MESH_LOGS",
     UPDATE_MESH_LOGS: "UPDATE_MESH_LOGS",
     DELETE_MESH_LOGS: "DELETE_MESH_LOGS"
 }
@@ -173,9 +176,21 @@ const mutations = {
     [types.UPDATE_LOGS](state, data) {
         state.logs.push(data)
     },
-    [types.UPDATE_MESH_LOGS](state, data) {
+    [types.SET_MESH_LOGS](state, data) {
         var meshLog = state.logs.find(x => x.name === data.mesh).log;
         meshLog.push(data.log);
+    },
+    [types.UPDATE_MESH_LOGS](state, data) {
+        var arrayRemove = (arr, value) => {
+            return arr.filter(function (ele) {
+                return ele != value;
+            });
+        }
+        var meshLog = state.logs.find(x => x.name === data.mesh).log;
+        var oldLog = meshLog.find(x => x.key === data.log.key);
+        var newMeshLog = arrayRemove(meshLog, oldLog);
+        newMeshLog.push(data.log);
+        state.logs.find(x => x.name === data.mesh).log = newMeshLog;
     },
     [types.DELETE_MESH_LOGS](state, data) {
         state.logs = state.logs.filter(x => x.name !== data);

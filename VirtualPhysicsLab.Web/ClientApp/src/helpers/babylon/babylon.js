@@ -21,6 +21,9 @@ export default {
     checkCollisions(obj, name) {
         return mesh.checkCollisions(obj, name);
     },
+    getCollisions(obj, name) {
+        return mesh.getCollisions(obj, name);
+    },
     setMeshToLastPosition(obj) {
         mesh.setMeshToLastPosition(obj);
     },

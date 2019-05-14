@@ -54,6 +54,7 @@ import RadnoOkruzenje from "@/components/experiment/menus/RadnoOkruzenje.vue";
 import FizikaElementa from "@/components/experiment/menus/FizikaElementa.vue";
 import Statistika from "@/components/experiment/menus/Statistika.vue";
 import { mapGetters, mapState } from "vuex";
+import babylon from "@/helpers/babylon/babylon.js";
 
 export default {
     name: "Menu",
@@ -105,9 +106,19 @@ export default {
         FizikaElementa,
         Statistika
     },
+    mounted() {
+        setInterval(() => {
+            this.updateLogs();
+        }, 1);
+    },
     computed: {
         ...mapState({
-            deletedMesh: state => state.experiment.deletedMesh
+            deletedMesh: state => state.experiment.deletedMesh,
+            existingMeshes: state => state.experiment.meshes
+        }),
+        ...mapGetters({
+            getMeshByName: "experiment/getMeshByName",
+            getMeshLog: "experiment/getMeshLog"
         })
     },
     methods: {
@@ -121,6 +132,73 @@ export default {
                 this.isMenu = false;
             }
         },
+        updateLogs() {
+            for (var i in this.existingMeshes) {
+                var mesh = this.getMeshByName(this.existingMeshes[i]);
+                var name = this.existingMeshes[i];
+                var physicsImpostor = mesh.physicsImpostor;
+                if (physicsImpostor.isDisposed === false) {
+                    this.updatePhysics(mesh, name);
+                    this.updateCollisions(mesh, name);
+                    this.updateRotation(mesh, name);
+                    this.updateMovement(mesh, name);
+                    this.updateForces(mesh, name);
+                }
+            }
+        },
+        updatePhysics(mesh, name) {},
+        updateCollisions(mesh, name) {
+            var collisions = babylon.getCollisions(mesh, name);
+            var logs = this.getMeshLog(name).filter(
+                x => x.type === "collisions"
+            );
+            for (var i in collisions) {
+                var log = logs.find(
+                    x => x.properties.collider === collisions[i]
+                );
+                if (log === undefined) {
+                    var firstTime = Date.now();
+                    var meshLog = {
+                        mesh: name,
+                        log: {
+                            name: "Sudar",
+                            icon: "fas fa-bullseye",
+                            type: "collisions",
+                            description: `(${collisions[i]})`,
+                            key: collisions[i],
+                            properties: {
+                                collider: collisions[i],
+                                counter: 1,
+                                times: [firstTime]
+                            }
+                        }
+                    };
+                    this.$store.commit("experiment/SET_MESH_LOGS", meshLog);
+                } else {
+                    var newTimes = log.properties.times;
+                    newTimes.push(Date.now());
+                    var meshLog = {
+                        mesh: name,
+                        log: {
+                            name: log.name,
+                            icon: log.icon,
+                            type: log.type,
+                            description: log.description,
+                            key: log.key,
+                            properties: {
+                                collider: log.properties.collider,
+                                counter: log.properties.counter + 1,
+                                times: newTimes
+                            }
+                        }
+                    };
+                    this.$store.commit("experiment/UPDATE_MESH_LOGS", meshLog);
+                }
+            }
+        },
+        updateRotation(mesh) {},
+        updateMovement(mesh) {},
+        updateForces(mesh) {},
         notification(msg) {
             this.$emit("notification", msg);
         },

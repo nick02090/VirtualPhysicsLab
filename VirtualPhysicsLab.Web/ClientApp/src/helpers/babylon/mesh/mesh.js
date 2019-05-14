@@ -160,5 +160,18 @@ export default {
     setMeshToLastPosition(mesh) {
         var lastPosition = store.state.experiment.lastPosition;
         mesh.position = lastPosition;
+    },
+    getCollisions(mesh, name) {
+        var allMeshes = store.state.experiment.meshes;
+        var meshes = allMeshes.filter(x => x != name);
+        var collisions = [];
+        for (var i in meshes) {
+            var obj = store.getters["experiment/getMeshByName"](meshes[i]);
+            var physicsImpostor = obj.physicsImpostor;
+            if (mesh.intersectsMesh(obj, false) && physicsImpostor.isDisposed === false) {
+                collisions.push(meshes[i]);
+            }
+        }
+        return collisions;
     }
 }

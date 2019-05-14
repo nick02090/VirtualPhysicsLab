@@ -221,7 +221,7 @@ export default {
                     description: `(${physic.name})`
                 }
             };
-            this.$store.commit("experiment/UPDATE_MESH_LOGS", meshLog);
+            this.$store.commit("experiment/SET_MESH_LOGS", meshLog);
             this.isModalActive = false;
             babylon.addPhysic(this.getMeshByName(this.mesh), physic);
         },

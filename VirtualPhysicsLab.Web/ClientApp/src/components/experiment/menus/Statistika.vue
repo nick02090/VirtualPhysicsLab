@@ -127,6 +127,10 @@ export default {
         }),
         currentMesh: {
             get: function() {
+                if (this.existingMeshes.length === 0) {
+                    this.mesh = null;
+                    return null;
+                }
                 if (this.mesh == null) {
                     var size = this.existingMeshes.length;
                     if (size > 0) {
@@ -186,9 +190,25 @@ export default {
     watch: {
         mesh(newMesh, previousMesh) {
             if (previousMesh) {
-                babylon.toggleHighlight(this.getMeshByName(previousMesh));
+                if (this.existingMeshes.length > 0) {
+                    if (this.existingMeshes.includes(previousMesh)) {
+                        babylon.toggleHighlight(
+                            this.getMeshByName(previousMesh)
+                        );
+                    }
+                }
             }
-            babylon.toggleHighlight(this.getMeshByName(newMesh));
+            if (newMesh) {
+                babylon.toggleHighlight(this.getMeshByName(newMesh));
+            }
+        },
+        existingMeshes(newMeshes, previousMeshes) {
+            if (newMeshes.length > 0) {
+                if (newMeshes.includes(this.mesh) === false) {
+                    let size = newMeshes.length;
+                    this.mesh = newMeshes[size - 1];
+                }
+            }
         }
     }
 };

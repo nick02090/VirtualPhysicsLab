@@ -27,10 +27,36 @@ export default {
     deleteMesh(obj, name) {
         mesh.delete(obj, name);
     },
+    showMeshAxis(name) {
+        var obj = store.getters["experiment/getMeshByName"](name);
+        var scene = store.state.experiment.scene;
+        var start = new BABYLON.Vector3.Zero(); // because mesh is their parent, they become locally assigned to it
+        var axis = this.createAxis(start, 2, scene);
+        for (var i in axis) {
+            axis[i].axis.parent = obj;
+            axis[i].char.parent = obj;
+        }
+        var meshAxis = {
+            mesh: name,
+            axis: axis
+        };
+        store.commit("experiment/UPDATE_MESH_AXIS", meshAxis);
+    },
+    deleteMeshAxis(name) {
+        var meshAxis = store.state.experiment.meshAxis.find(x => x.mesh === name);
+        for (var i in meshAxis.axis) {
+            var line = meshAxis.axis[i].axis;
+            var char = meshAxis.axis[i].char;
+            line.dispose();
+            char.dispose();
+        }
+        store.commit("experiment/DELETE_MESH_AXIS", name);
+    },
     showAxis() {
         var scene = store.state.experiment.scene;
         var start = new BABYLON.Vector3(-10, -1, -10);
-        this.createAxis(start, 5, scene);
+        var axis = this.createAxis(start, 5, scene);
+        store.commit("experiment/SET_AXIS", axis);
     },
     removeAxis() {
         var axis = store.state.experiment.axis;
@@ -92,7 +118,7 @@ export default {
             char: zChar
         };
         var axis = [x, y, z];
-        store.commit("experiment/SET_AXIS", axis);
+        return axis;
     },
     createEmptyScene(canvas, engine) {
         var scene = new BABYLON.Scene(engine);
@@ -123,7 +149,7 @@ export default {
         store.commit("experiment/SET_LIGHT", light);
 
         var gravityVector = new BABYLON.Vector3(0, -9.81, 0);
-        var physicsPlugin = new BABYLON.OimoJSPlugin();
+        var physicsPlugin = new BABYLON.CannonJSPlugin();
         scene.enablePhysics(gravityVector, physicsPlugin);
 
         var ground = BABYLON.MeshBuilder.CreateBox("ground", {
@@ -137,7 +163,7 @@ export default {
             BABYLON.PhysicsImpostor.BoxImpostor, {
                 mass: 0,
                 friction: 0.1,
-                restitution: 0
+                restitution: 0.9
             },
             scene);
 
@@ -163,7 +189,8 @@ export default {
         store.commit("experiment/SET_DRAG_BEHAVIOUR", [xDragBehaviour, yDragBehaviour, zDragBehaviour]);
 
         var start = new BABYLON.Vector3(-10, -1, -10);
-        this.createAxis(start, 5, scene);
+        var axis = this.createAxis(start, 5, scene);
+        store.commit("experiment/SET_AXIS", axis);
 
         return scene;
     }

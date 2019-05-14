@@ -109,13 +109,14 @@ export default {
                 {
                     name: "Brzina",
                     icon: "fas fa-running",
-                    component: Brzina
+                    component: Brzina,
+                    interval: null
                 }
             ]
         };
     },
     created() {
-        setInterval(() => {
+        this.physics[0].interval = setInterval(() => {
             this.updateVelocity();
         }, 1);
     },
@@ -126,6 +127,7 @@ export default {
         if (this.mesh) {
             babylon.toggleHighlight(this.getMeshByName(this.mesh));
         }
+        clearInterval(this.physics[0].interval);
     },
     computed: {
         ...mapGetters({
@@ -148,6 +150,10 @@ export default {
         },
         currentMesh: {
             get: function() {
+                if (this.existingMeshes.length === 0) {
+                    this.mesh = null;
+                    return null;
+                }
                 if (this.mesh == null) {
                     var size = this.existingMeshes.length;
                     if (size > 0) {
@@ -178,13 +184,14 @@ export default {
             }
         },
         updateVelocity() {
-            if (this.mesh) {
-                var velocity = this.getMeshByName(
-                    this.mesh
-                ).physicsImpostor.getLinearVelocity();
-                this.meshPhysic.velocity.x = this.roundDecimal(velocity.x);
-                this.meshPhysic.velocity.y = this.roundDecimal(velocity.y);
-                this.meshPhysic.velocity.z = this.roundDecimal(velocity.z);
+            if (this.mesh && this.physic.length > 0) {
+                var obj = this.getMeshByName(this.mesh);
+                if (obj) {
+                    var velocity = obj.physicsImpostor.getLinearVelocity();
+                    this.meshPhysic.velocity.x = this.roundDecimal(velocity.x);
+                    this.meshPhysic.velocity.y = this.roundDecimal(velocity.y);
+                    this.meshPhysic.velocity.z = this.roundDecimal(velocity.z);
+                }
             }
         },
         roundDecimal(value) {
@@ -241,9 +248,25 @@ export default {
     watch: {
         mesh(newMesh, previousMesh) {
             if (previousMesh) {
-                babylon.toggleHighlight(this.getMeshByName(previousMesh));
+                if (this.existingMeshes.length > 0) {
+                    if (this.existingMeshes.includes(previousMesh)) {
+                        babylon.toggleHighlight(
+                            this.getMeshByName(previousMesh)
+                        );
+                    }
+                }
             }
-            babylon.toggleHighlight(this.getMeshByName(newMesh));
+            if (newMesh) {
+                babylon.toggleHighlight(this.getMeshByName(newMesh));
+            }
+        },
+        existingMeshes(newMeshes, previousMeshes) {
+            if (newMeshes.length > 0) {
+                if (newMeshes.includes(this.mesh) === false) {
+                    let size = newMeshes.length;
+                    this.mesh = newMeshes[size - 1];
+                }
+            }
         },
         "meshPhysic.velocity.x": function(newVelocity, oldVelocity) {
             if (newVelocity === 0) {

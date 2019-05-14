@@ -53,6 +53,7 @@ import UrediElement from "@/components/experiment/menus/UrediElement.vue";
 import RadnoOkruzenje from "@/components/experiment/menus/RadnoOkruzenje.vue";
 import FizikaElementa from "@/components/experiment/menus/FizikaElementa.vue";
 import Statistika from "@/components/experiment/menus/Statistika.vue";
+import { mapGetters, mapState } from "vuex";
 
 export default {
     name: "Menu",
@@ -104,6 +105,11 @@ export default {
         FizikaElementa,
         Statistika
     },
+    computed: {
+        ...mapState({
+            deletedMesh: state => state.experiment.deletedMesh
+        })
+    },
     methods: {
         changeMenu(menuData) {
             this.isMenu = !this.isMenu;
@@ -120,6 +126,14 @@ export default {
         },
         error(msg) {
             this.$emit("error", msg);
+        }
+    },
+    watch: {
+        deletedMesh(current, previous) {
+            if (previous == null && current != null) {
+                this.error(`Izbrisan je element ${current}`);
+                this.$store.commit("experiment/SET_DELETED_MESH", null);
+            }
         }
     }
 };

@@ -17,61 +17,91 @@
                     </select>
                 </div>
             </b-field>
+            <div class="control is-flex">
+                <div class="control margin-right">
+                    <label class="label">Koordinatne osi</label>
+                </div>
+                <div class="control margin-left">
+                    <b-tooltip
+                        type="is-black"
+                        label="Uključi/Isključi prikaz lokalnih koordinatnih osi."
+                    >
+                        <b-switch v-model="hasAxis" @input="switchAxis"></b-switch>
+                    </b-tooltip>
+                </div>
+            </div>
+            <div class="control is-flex">
+                <div class="control margin-right">
+                    <label class="label">Pomakni</label>
+                </div>
+                <div class="control margin-left" style="text-align: right">
+                    <b-tooltip
+                        v-if="hasCollisions && isDrag"
+                        type="is-black"
+                        label="Postoje kolizije!"
+                    >
+                        <b-switch v-model="isDrag" disabled></b-switch>
+                    </b-tooltip>
+                    <b-switch v-else v-model="isDrag" @input="switchDrag"></b-switch>
+
+                    <div class="block">
+                        <b-radio v-model="axis" :native-value="0" :disabled="!isDrag">x</b-radio>
+                        <b-radio v-model="axis" :native-value="1" :disabled="!isDrag">y</b-radio>
+                        <b-radio v-model="axis" :native-value="2" :disabled="!isDrag">z</b-radio>
+                    </div>
+                </div>
+            </div>
             <div class="field">
-                <label class="label">Postavke</label>
-                <b-tooltip v-if="hasCollisions && isDrag" type="is-black" label="Postoje kolizije!">
-                    <b-switch v-model="isDrag" disabled>Pomakni</b-switch>
-                </b-tooltip>
-                <b-switch v-else v-model="isDrag" @input="switchDrag">Pomakni</b-switch>
-                <div class="block">
-                    <b-radio v-model="axis" :native-value="0">x</b-radio>
-                    <b-radio v-model="axis" :native-value="1">y</b-radio>
-                    <b-radio v-model="axis" :native-value="2">z</b-radio>
-                </div>
-                <div class="field">
-                    <label class="label">Rotacija (os Y)</label>
+                <label class="label">Rotacija (os Y)</label>
+                <b-field>
                     <b-field>
-                        <b-field>
-                            <b-tooltip label="Stupnjevi" type="is-black">
-                                <b-input v-model="rotation.d"></b-input>
-                            </b-tooltip>
-                            <p class="control">
-                                <span class="button is-static">°</span>
-                            </p>
-                        </b-field>
-                        <b-field>
-                            <b-tooltip label="Minute" type="is-black">
-                                <b-input
-                                    v-model="rotation.m"
-                                    name="minutes"
-                                    v-validate="'numeric|min_value:0|max_value:59'"
-                                ></b-input>
-                            </b-tooltip>
-                            <p class="control">
-                                <span class="button is-static">'</span>
-                            </p>
-                        </b-field>
-                        <b-field>
-                            <b-tooltip label="Sekunde" type="is-black">
-                                <b-input
-                                    v-model="rotation.s"
-                                    name="seconds"
-                                    v-validate="'numeric|min_value:0|max_value:59'"
-                                ></b-input>
-                            </b-tooltip>
-                            <p class="control">
-                                <span class="button is-static">"</span>
-                            </p>
-                        </b-field>
-                        <b-tooltip label="Resetiraj" type="is-black">
-                            <button class="button is-warning" @click="resetRotation">
-                                <span class="icon">
-                                    <i class="fas fa-redo"></i>
-                                </span>
-                            </button>
+                        <b-tooltip label="Stupnjevi" type="is-black">
+                            <b-input v-model="rotation.d"></b-input>
                         </b-tooltip>
+                        <p class="control">
+                            <span class="button is-static">°</span>
+                        </p>
                     </b-field>
-                </div>
+                    <b-field>
+                        <b-tooltip label="Minute" type="is-black">
+                            <b-input
+                                v-model="rotation.m"
+                                name="minutes"
+                                v-validate="'numeric|min_value:0|max_value:59'"
+                            ></b-input>
+                        </b-tooltip>
+                        <p class="control">
+                            <span class="button is-static">'</span>
+                        </p>
+                    </b-field>
+                    <b-field>
+                        <b-tooltip label="Sekunde" type="is-black">
+                            <b-input
+                                v-model="rotation.s"
+                                name="seconds"
+                                v-validate="'numeric|min_value:0|max_value:59'"
+                            ></b-input>
+                        </b-tooltip>
+                        <p class="control">
+                            <span class="button is-static">"</span>
+                        </p>
+                    </b-field>
+                    <b-tooltip label="Resetiraj" type="is-black">
+                        <button class="button is-warning" @click="resetRotation">
+                            <span class="icon">
+                                <i class="fas fa-redo"></i>
+                            </span>
+                        </button>
+                    </b-tooltip>
+                </b-field>
+            </div>
+            <div class="field">
+                <button class="button is-danger" @click="deleteMesh">
+                    <span class="icon">
+                        <i class="fas fa-times"></i>
+                    </span>
+                    <span>Izbriši</span>
+                </button>
             </div>
         </div>
     </div>
@@ -89,6 +119,7 @@ export default {
         return {
             isDrag: false,
             hasCollisions: false,
+            myAxis: false,
             axis: 0,
             mesh: null,
             rotation: {
@@ -122,8 +153,26 @@ export default {
             getMeshByName: "experiment/getMeshByName"
         }),
         ...mapState({
-            existingMeshes: state => state.experiment.meshes
+            existingMeshes: state => state.experiment.meshes,
+            meshAxis: state => state.experiment.meshAxis
         }),
+        hasAxis: {
+            get: function() {
+                if (this.meshAxis.length === 0) {
+                    return false;
+                }
+                var currentMeshAxis = this.meshAxis.find(
+                    x => x.mesh === this.mesh
+                );
+                if (currentMeshAxis) {
+                    return true;
+                }
+                return false;
+            },
+            set: function(value) {
+                this.myAxis = value;
+            }
+        },
         scene: {
             get: function() {
                 return this.$store.state.experiment.scene;
@@ -134,6 +183,10 @@ export default {
         },
         currentMesh: {
             get: function() {
+                if (this.existingMeshes.length === 0) {
+                    this.mesh = null;
+                    return null;
+                }
                 if (this.mesh == null) {
                     var size = this.existingMeshes.length;
                     if (size > 0) {
@@ -151,6 +204,11 @@ export default {
         }
     },
     methods: {
+        deleteMesh() {
+            var obj = this.getMeshByName(this.mesh);
+            babylon.deleteMesh(obj, this.mesh);
+            this.$store.commit("experiment/SET_DELETED_MESH", this.mesh);
+        },
         setCurrentRotation(rotation) {
             var mesh = this.getMeshByName(this.mesh);
             var axis = new BABYLON.Vector3(0, 1, 0);
@@ -228,6 +286,13 @@ export default {
         resetRotation() {
             this.setCurrentRotation(0);
         },
+        switchAxis(value) {
+            if (value) {
+                babylon.showMeshAxis(this.mesh);
+            } else {
+                babylon.deleteMeshAxis(this.mesh);
+            }
+        },
         notification(msg) {
             this.$emit("notification", msg);
         },
@@ -261,9 +326,25 @@ export default {
         },
         mesh(newMesh, previousMesh) {
             if (previousMesh) {
-                babylon.toggleHighlight(this.getMeshByName(previousMesh));
+                if (this.existingMeshes.length > 0) {
+                    if (this.existingMeshes.includes(previousMesh)) {
+                        babylon.toggleHighlight(
+                            this.getMeshByName(previousMesh)
+                        );
+                    }
+                }
             }
-            babylon.toggleHighlight(this.getMeshByName(newMesh));
+            if (newMesh) {
+                babylon.toggleHighlight(this.getMeshByName(newMesh));
+            }
+        },
+        existingMeshes(newMeshes, previousMeshes) {
+            if (newMeshes.length > 0) {
+                if (newMeshes.includes(this.mesh) === false) {
+                    let size = newMeshes.length;
+                    this.mesh = newMeshes[size -1];
+                }
+            }
         }
     }
 };

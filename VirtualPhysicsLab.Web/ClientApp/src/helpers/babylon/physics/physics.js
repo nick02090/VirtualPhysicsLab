@@ -14,7 +14,7 @@ export default {
                 mesh.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(parseFloat(properties.value), 0, 0));
                 break;
             case 2:
-                mesh.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(0, 0, parseFloat(properties.value)))
+                mesh.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(0, 0, parseFloat(properties.value)));
                 break;
         }
     }

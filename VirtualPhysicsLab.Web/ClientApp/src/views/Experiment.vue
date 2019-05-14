@@ -21,6 +21,7 @@
 import colors from "@/helpers/colors.js";
 import babylon from "@/helpers/babylon/babylon.js";
 import Menu from "@/components/experiment/Menu.vue";
+import { mapActions } from "vuex";
 
 export default {
     name: "Experiment",
@@ -44,6 +45,9 @@ export default {
         }
     },
     methods: {
+        ...mapActions({
+            createWalls: "experiment/createWalls"
+        }),
         initScene() {
             var canvas = document.getElementById("renderCanvas");
             var engine = new BABYLON.Engine(canvas, true);
@@ -61,6 +65,7 @@ export default {
             });
 
             this.scene = scene;
+            this.createWalls();
         },
         error(msg) {
             this.$toast.open({

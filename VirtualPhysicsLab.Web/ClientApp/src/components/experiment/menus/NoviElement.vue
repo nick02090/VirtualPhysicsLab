@@ -50,33 +50,11 @@
                     </div>
                 </div>
             </div>
-            <div class="field" v-if="false">
-                <label class="label">Preslikaj postojeći</label>
-                <div class="control is-flex">
-                    <div class="select">
-                        <select v-model="mesh">
-                            <option
-                                v-for="mesh in existingMeshes"
-                                :key="mesh"
-                                :value="mesh"
-                            >{{mesh}}</option>
-                        </select>
-                    </div>
-                    <div class="control margin-left">
-                        <button class="button is-success" disabled>
-                            <span class="icon">
-                                <i class="fas fa-copy"></i>
-                            </span>
-                            <span>Preslikaj</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
         <div class="second-stage" v-if="stage === 1">
             <div class="field">
                 <label class="label">Pozicioniranje</label>
-                <p>Smjestite element na sceni tako da nije u dodiru s drugima.</p>
+                <p>Smjestite element na sceni tako da nije u dodiru s drugima. Prilikom pozicioniranja fizika elementa je isključena.</p>
                 <div class="block">
                     <b-radio v-model="axis" :native-value="0">x</b-radio>
                     <b-radio v-model="axis" :native-value="1">y</b-radio>
@@ -134,14 +112,6 @@ export default {
             isSuccess: false,
             properties: {
                 name: "",
-                width: 2,
-                height: 2,
-                depth: 2,
-                position: {
-                    x: 0,
-                    y: 0,
-                    z: 0
-                },
                 mass: 1
             },
             color: "#284E7B"

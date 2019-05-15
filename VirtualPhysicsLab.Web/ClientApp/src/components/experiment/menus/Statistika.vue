@@ -36,7 +36,7 @@
                 </div>
             </b-field>
 
-            <b-table :data="log" hoverable paginated :per-page="5">
+            <b-table :data="log" hoverable paginated :per-page="5" :pagination-simple="true">
                 <template slot="header">Povijest nadzora</template>
 
                 <template slot-scope="props">

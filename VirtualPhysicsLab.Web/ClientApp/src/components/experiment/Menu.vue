@@ -61,6 +61,7 @@ export default {
     data() {
         return {
             isMenu: true,
+            secondsCounter: 1,
             activeMenu: {
                 name: "Novi element",
                 component: NoviElement
@@ -140,10 +141,16 @@ export default {
                 if (physicsImpostor.isDisposed === false) {
                     this.updatePhysics(mesh, name);
                     this.updateCollisions(mesh, name);
-                    this.updateRotation(mesh, name);
+                    if (this.secondsCounter === 500) {
+                        this.updateRotation(mesh, name);
+                    }
                     this.updateMovement(mesh, name);
                     this.updateForces(mesh, name);
                 }
+            }
+            this.secondsCounter += 1;
+            if (this.secondsCounter === 1001) {
+                this.secondsCounter = 1;
             }
         },
         updatePhysics(mesh, name) {},
@@ -152,11 +159,16 @@ export default {
             var logs = this.getMeshLog(name).filter(
                 x => x.type === "collisions"
             );
-            for (var i in collisions) {
+            for (var i in this.existingMeshes) {
+                var currentMesh = this.existingMeshes[i];
+                if (currentMesh === name) continue;
                 var log = logs.find(
-                    x => x.properties.collider === collisions[i]
+                    x =>
+                        x.properties.collider === currentMesh &&
+                        x.properties.time.end === null
                 );
-                if (log === undefined) {
+                var collider = collisions.find(x => x === currentMesh);
+                if (log === undefined && collider !== undefined) {
                     var firstTime = Date.now();
                     var meshLog = {
                         mesh: name,
@@ -164,19 +176,21 @@ export default {
                             name: "Sudar",
                             icon: "fas fa-bullseye",
                             type: "collisions",
-                            description: `(${collisions[i]})`,
-                            key: collisions[i],
+                            description: `(${collider})`,
+                            key: firstTime,
                             properties: {
-                                collider: collisions[i],
-                                counter: 1,
-                                times: [firstTime]
+                                collider: collider,
+                                time: {
+                                    start: firstTime,
+                                    end: null
+                                }
                             }
                         }
                     };
                     this.$store.commit("experiment/SET_MESH_LOGS", meshLog);
-                } else {
-                    var newTimes = log.properties.times;
-                    newTimes.push(Date.now());
+                } else if (log !== undefined && collider === undefined) {
+                    var startTime = log.properties.time.start;
+                    var time = Date.now();
                     var meshLog = {
                         mesh: name,
                         log: {
@@ -187,8 +201,10 @@ export default {
                             key: log.key,
                             properties: {
                                 collider: log.properties.collider,
-                                counter: log.properties.counter + 1,
-                                times: newTimes
+                                time: {
+                                    start: startTime,
+                                    end: time
+                                }
                             }
                         }
                     };
@@ -196,9 +212,86 @@ export default {
                 }
             }
         },
-        updateRotation(mesh) {},
+        updateRotation(mesh, name) {
+            var eulerAngles = mesh.rotationQuaternion.toEulerAngles();
+            var rotation = {
+                x: this.radianToDegree(eulerAngles.x),
+                y: this.radianToDegree(eulerAngles.y),
+                z: this.radianToDegree(eulerAngles.z)
+            };
+            var logs = this.getMeshLog(name).filter(x => x.type === "rotation");
+            var size = logs.length;
+            if (size > 0) {
+                var logX = logs.find(x => x.key === "x");
+                this.compareRotation(rotation, "x", name, logX);
+
+                var logY = logs.find(x => x.key === "y");
+                this.compareRotation(rotation, "y", name, logY);
+
+                var logZ = logs.find(x => x.key === "z");
+                this.compareRotation(rotation, "z", name, logZ);
+            } else {
+                this.compareRotation(rotation, "x", name, undefined);
+                this.compareRotation(rotation, "y", name, undefined);
+                this.compareRotation(rotation, "z", name, undefined);
+            }
+        },
+        compareRotation(rotation, axis, name, log) {
+            if (log === undefined) {
+                var meshLog = {
+                    mesh: name,
+                    log: {
+                        name: "Rotacija",
+                        icon: "fas fa-sync-alt",
+                        type: "rotation",
+                        description: `(${axis}-os)`,
+                        key: axis,
+                        properties: {
+                            rotations: [
+                                {
+                                    value: rotation,
+                                    time: Date.now()
+                                }
+                            ]
+                        }
+                    }
+                };
+                this.$store.commit("experiment/SET_MESH_LOGS", meshLog);
+            } else {
+                var size = log.properties.rotations.length;
+                var lastRotation = log.properties.rotations[size - 1].value;
+                if (
+                    Math.abs(rotation[axis] - lastRotation[axis]).toFixed(2) > 0
+                ) {
+                    var newRotations = log.properties.rotations;
+                    newRotations.push({
+                        value: rotation,
+                        time: Date.now()
+                    });
+                    var meshLog = {
+                        mesh: name,
+                        log: {
+                            name: "Rotacija",
+                            icon: "fas fa-sync-alt",
+                            type: "rotation",
+                            description: `(${axis}-os)`,
+                            key: axis,
+                            properties: {
+                                rotations: newRotations
+                            }
+                        }
+                    };
+                    this.$store.commit("experiment/UPDATE_MESH_LOGS", meshLog);
+                }
+            }
+        },
         updateMovement(mesh) {},
         updateForces(mesh) {},
+        radianToDegree(degrees) {
+            var pi = Math.PI;
+            var radians = degrees * (180 / pi);
+            return parseFloat(radians.toFixed(2));
+        },
         notification(msg) {
             this.$emit("notification", msg);
         },

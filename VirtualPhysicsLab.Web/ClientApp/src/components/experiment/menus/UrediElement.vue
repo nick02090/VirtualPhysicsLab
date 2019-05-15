@@ -227,7 +227,7 @@ export default {
         setDMS() {
             var rotation = this.getCurrentRotation();
             if (rotation == undefined) return;
-            var deg = rotation.toFixed(5);
+            var deg = rotation.toFixed(2);
             if (Math.abs(deg).toFixed(2) == 0) deg = Math.abs(deg);
             this.rotation.d = Math.floor(deg);
             var minFloat = (deg - this.rotation.d) * 60;
@@ -342,7 +342,7 @@ export default {
             if (newMeshes.length > 0) {
                 if (newMeshes.includes(this.mesh) === false) {
                     let size = newMeshes.length;
-                    this.mesh = newMeshes[size -1];
+                    this.mesh = newMeshes[size - 1];
                 }
             }
         }

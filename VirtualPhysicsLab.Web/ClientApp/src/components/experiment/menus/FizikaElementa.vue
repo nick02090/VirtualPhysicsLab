@@ -109,16 +109,10 @@ export default {
                 {
                     name: "Brzina",
                     icon: "fas fa-running",
-                    component: Brzina,
-                    interval: null
+                    component: Brzina
                 }
             ]
         };
-    },
-    created() {
-        this.physics[0].interval = setInterval(() => {
-            this.updateVelocity();
-        }, 1);
     },
     components: {
         Brzina
@@ -127,7 +121,6 @@ export default {
         if (this.mesh) {
             babylon.toggleHighlight(this.getMeshByName(this.mesh));
         }
-        clearInterval(this.physics[0].interval);
     },
     computed: {
         ...mapGetters({
@@ -174,30 +167,13 @@ export default {
         physicInfo(physic) {
             switch (physic.name) {
                 case "Brzina":
-                    var velocity = this.meshPhysic.velocity[
-                        physic.properties.axisString
-                    ];
-                    return `${velocity} ${physic.properties.unit}`;
+                    return `${physic.properties.value} ${
+                        physic.properties.unit
+                    }`;
                     break;
                 default:
                     break;
             }
-        },
-        updateVelocity() {
-            if (this.mesh && this.physic.length > 0) {
-                var obj = this.getMeshByName(this.mesh);
-                if (obj) {
-                    var velocity = obj.physicsImpostor.getLinearVelocity();
-                    this.meshPhysic.velocity.x = this.roundDecimal(velocity.x);
-                    this.meshPhysic.velocity.y = this.roundDecimal(velocity.y);
-                    this.meshPhysic.velocity.z = this.roundDecimal(velocity.z);
-                }
-            }
-        },
-        roundDecimal(value) {
-            var round = value.toFixed(2);
-            if (Math.abs(round) == 0) return 0;
-            return round;
         },
         createPhysic() {
             this.selectedPhysic = this.physics[0];
@@ -212,25 +188,54 @@ export default {
                 physic: physic
             };
             this.$store.commit("experiment/UPDATE_MESH_PHYSICS", meshPhysic);
+            var values = [];
+            switch (physic.properties.axisString) {
+                case "x":
+                    values.push({
+                        x: physic.properties.value,
+                        y: 0,
+                        z: 0
+                    });
+                    break;
+                case "y":
+                    values.push({
+                        x: 0,
+                        y: physic.properties.value,
+                        z: 0
+                    });
+                    break;
+                case "z":
+                    values.push({
+                        x: 0,
+                        y: physic.properties.value,
+                        z: 0
+                    });
+                    break;
+                default:
+                    break;
+            }
             var meshLog = {
                 mesh: this.mesh,
                 log: {
                     name: "Dodana fizika",
                     icon: "fas fa-atom",
                     type: "physics",
-                    description: `(${physic.name})`
+                    key: "velocity",
+                    description: `(${physic.name})`,
+                    properties: {
+                        axis: physic.properties.axis,
+                        axisString: physic.properties.axisString,
+                        values: values,
+                        time: {
+                            start: Date.now(),
+                            end: null
+                        }
+                    }
                 }
             };
             this.$store.commit("experiment/SET_MESH_LOGS", meshLog);
             this.isModalActive = false;
             babylon.addPhysic(this.getMeshByName(this.mesh), physic);
-        },
-        removePhysics(physic) {
-            var meshPhysic = {
-                mesh: this.mesh,
-                physic: physic
-            };
-            this.$store.commit("experiment/REMOVE_MESH_PHYSIC", meshPhysic);
         },
         notification(msg) {
             this.$emit("notification", msg);
@@ -265,36 +270,6 @@ export default {
                 if (newMeshes.includes(this.mesh) === false) {
                     let size = newMeshes.length;
                     this.mesh = newMeshes[size - 1];
-                }
-            }
-        },
-        "meshPhysic.velocity.x": function(newVelocity, oldVelocity) {
-            if (newVelocity === 0) {
-                var physic = this.physic.find(
-                    x => x.name === "Brzina" && x.properties.axis === 0
-                );
-                if (physic) {
-                    this.removePhysics(physic);
-                }
-            }
-        },
-        "meshPhysic.velocity.y": function(newVelocity, oldVelocity) {
-            if (newVelocity === 0) {
-                var physic = this.physic.find(
-                    x => x.name === "Brzina" && x.properties.axis === 1
-                );
-                if (physic) {
-                    this.removePhysics(physic);
-                }
-            }
-        },
-        "meshPhysic.velocity.z": function(newVelocity, oldVelocity) {
-            if (newVelocity === 0) {
-                var physic = this.physic.find(
-                    x => x.name === "Brzina" && x.properties.axis === 2
-                );
-                if (physic) {
-                    this.removePhysics(physic);
                 }
             }
         }

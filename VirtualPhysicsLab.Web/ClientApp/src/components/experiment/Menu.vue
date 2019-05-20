@@ -62,6 +62,12 @@ export default {
         return {
             isMenu: true,
             secondsCounter: 1,
+            physics: [
+                {
+                    name: "Brzina",
+                    key: "velocity"
+                }
+            ],
             activeMenu: {
                 name: "Novi element",
                 component: NoviElement
@@ -119,7 +125,8 @@ export default {
         }),
         ...mapGetters({
             getMeshByName: "experiment/getMeshByName",
-            getMeshLog: "experiment/getMeshLog"
+            getMeshLog: "experiment/getMeshLog",
+            getMeshPhysic: "experiment/getMeshPhysic"
         })
     },
     methods: {
@@ -141,11 +148,10 @@ export default {
                 if (physicsImpostor.isDisposed === false) {
                     this.updatePhysics(mesh, name);
                     this.updateCollisions(mesh, name);
-                    if (this.secondsCounter === 500) {
+                    if (this.secondsCounter === 1000) {
                         this.updateRotation(mesh, name);
+                        this.updateMovement(mesh, name);
                     }
-                    this.updateMovement(mesh, name);
-                    this.updateForces(mesh, name);
                 }
             }
             this.secondsCounter += 1;
@@ -153,7 +159,111 @@ export default {
                 this.secondsCounter = 1;
             }
         },
-        updatePhysics(mesh, name) {},
+        physic(name) {
+            return this.getMeshPhysic(name);
+        },
+        updatePhysics(mesh, name) {
+            for (var i in this.physics) {
+                switch (this.physics[i].key) {
+                    case "velocity":
+                        this.updateVelocity(mesh, name);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        },
+        updateVelocity(mesh, name) {
+            var linearVelocity = mesh.physicsImpostor.getLinearVelocity();
+            var velocity = {
+                x: this.roundDecimal(linearVelocity.x),
+                y: this.roundDecimal(linearVelocity.y),
+                z: this.roundDecimal(linearVelocity.z)
+            };
+            this.compareVelocity(velocity.x, velocity, 0, name);
+            this.compareVelocity(velocity.y, velocity, 1, name);
+            this.compareVelocity(velocity.z, velocity, 2, name);
+        },
+        compareVelocity(newVelocity, velocity, axis, name) {
+            if (newVelocity === 0) {
+                var physic = this.physic(name).find(
+                    x => x.name === "Brzina" && x.properties.axis === axis
+                );
+                if (physic) {
+                    this.removeMeshPhysics(physic, name);
+                    this.updateMeshVelocity(velocity, axis, name, Date.now());
+                }
+            } else {
+                var axisString = axis === 0 ? "x" : "z";
+                var physic = {
+                    name: "Brzina",
+                    icon: "fas fa-running",
+                    description: `${axisString}-os`,
+                    properties: {
+                        value: velocity[axisString],
+                        axis: axis,
+                        axisString: axisString,
+                        unit: "m/s"
+                    }
+                };
+                this.updateMeshPhysics(name, physic);
+                this.updateMeshVelocity(velocity, axis, name, null);
+            }
+        },
+        updateMeshVelocity(velocity, axis, name, endTime) {
+            var logs = this.getMeshLog(name).filter(
+                x => x.type === "physics" && x.key === "velocity"
+            );
+            var log = logs.find(
+                x =>
+                    x.properties.axis === axis && x.properties.time.end === null
+            );
+            if (log) {
+                var newValues = log.properties.values;
+                newValues.push(velocity);
+                var startTime = log.properties.time.start;
+                var axisString = axis === 0 ? "x" : "z";
+                var meshLog = {
+                    mesh: name,
+                    log: {
+                        name: "Dodana fizika",
+                        icon: "fas fa-atom",
+                        type: "physics",
+                        key: "velocity",
+                        description: `(${axisString}-os)`,
+                        properties: {
+                            axis: axis,
+                            axisString: axisString,
+                            values: newValues,
+                            time: {
+                                start: startTime,
+                                end: endTime
+                            }
+                        }
+                    }
+                };
+                this.$store.commit("experiment/UPDATE_MESH_LOGS", meshLog);
+            }
+        },
+        updateMeshPhysics(name, physic) {
+            var meshPhysic = {
+                mesh: name,
+                physic: physic
+            };
+            this.$store.commit("experiment/UPDATE_MESH_PHYSICS", meshPhysic);
+        },
+        removeMeshPhysics(physic, name) {
+            var meshPhysic = {
+                mesh: name,
+                physic: physic
+            };
+            this.$store.commit("experiment/REMOVE_MESH_PHYSIC", meshPhysic);
+        },
+        roundDecimal(value) {
+            var round = value.toFixed(2);
+            if (Math.abs(round) == 0) return 0;
+            return round;
+        },
         updateCollisions(mesh, name) {
             var collisions = babylon.getCollisions(mesh, name);
             var logs = this.getMeshLog(name).filter(
@@ -285,8 +395,78 @@ export default {
                 }
             }
         },
-        updateMovement(mesh) {},
-        updateForces(mesh) {},
+        updateMovement(mesh, name) {
+            var position = {
+                x: mesh.position.x,
+                y: mesh.position.y,
+                z: mesh.position.z
+            };
+            var logs = this.getMeshLog(name).filter(x => x.type === "movement");
+            var size = logs.length;
+            if (size > 0) {
+                var logX = logs.find(x => x.key === "x");
+                this.comparePosition(position, "x", name, logX);
+
+                var logY = logs.find(x => x.key === "y");
+                this.comparePosition(position, "y", name, logY);
+
+                var logZ = logs.find(x => x.key === "z");
+                this.comparePosition(position, "z", name, logZ);
+            } else {
+                this.comparePosition(position, "x", name, undefined);
+                this.comparePosition(position, "y", name, undefined);
+                this.comparePosition(position, "z", name, undefined);
+            }
+        },
+        comparePosition(position, axis, name, log) {
+            if (log === undefined) {
+                var meshLog = {
+                    mesh: name,
+                    log: {
+                        name: "Pomak",
+                        icon: "fas fa-shoe-prints",
+                        type: "movement",
+                        description: `(${axis}-os)`,
+                        key: axis,
+                        properties: {
+                            positions: [
+                                {
+                                    value: position,
+                                    time: Date.now()
+                                }
+                            ]
+                        }
+                    }
+                };
+                this.$store.commit("experiment/SET_MESH_LOGS", meshLog);
+            } else {
+                var size = log.properties.positions.length;
+                var lastPosition = log.properties.positions[size - 1].value;
+                if (
+                    Math.abs(position[axis] - lastPosition[axis]).toFixed(2) > 0
+                ) {
+                    var newPositions = log.properties.positions;
+                    newPositions.push({
+                        value: position,
+                        time: Date.now()
+                    });
+                    var meshLog = {
+                        mesh: name,
+                        log: {
+                            name: "Pomak",
+                            icon: "fas fa-shoe-prints",
+                            type: "movement",
+                            description: `(${axis}-os)`,
+                            key: axis,
+                            properties: {
+                                positions: newPositions
+                            }
+                        }
+                    };
+                    this.$store.commit("experiment/UPDATE_MESH_LOGS", meshLog);
+                }
+            }
+        },
         radianToDegree(degrees) {
             var pi = Math.PI;
             var radians = degrees * (180 / pi);

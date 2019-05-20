@@ -102,12 +102,6 @@ export default {
                     type: "movement",
                     description: "Kretnja elementa po sceni.",
                     visible: false
-                },
-                {
-                    name: "Sila",
-                    type: "forces",
-                    description: "Sile koje djeluju na element.",
-                    visible: false
                 }
             ]
         };

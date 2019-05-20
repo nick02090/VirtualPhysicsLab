@@ -134,7 +134,10 @@ const mutations = {
         for (var i in duplicates) {
             switch (duplicates[i].name) {
                 case "Brzina":
-                    if (duplicates[i].properties.axis === data.physic.properties.axis) return;
+                    if (duplicates[i].properties.axis === data.physic.properties.axis) {
+                        duplicates[i].properties.value = data.physic.properties.value;
+                        return;
+                    }
                     break;
                 default:
                     break;
@@ -187,7 +190,8 @@ const mutations = {
             });
         }
         var meshLog = state.logs.find(x => x.name === data.mesh).log;
-        var oldLog = meshLog.find(x => x.key === data.log.key);
+        var group = meshLog.filter(x => x.type === data.log.type);
+        var oldLog = group.find(x => x.key === data.log.key);
         var newMeshLog = arrayRemove(meshLog, oldLog);
         newMeshLog.push(data.log);
         state.logs.find(x => x.name === data.mesh).log = newMeshLog;

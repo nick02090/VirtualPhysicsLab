@@ -31,6 +31,9 @@ const types = {
     SET_GROUND: "SET_GROUND",
     SET_WALLS: "SET_WALLS",
     SET_CANVAS: "SET_CANVAS",
+    SET_PLAYING: "SET_PLAYING",
+    SET_MESH_IMPOSTORS: "SET_MESH_IMPOSTORS",
+    UPDATE_MESH_IMPOSTORS: "UPDATE_MESH_IMPOSTORS",
 
     SET_PHYSICS_IMPOSTOR: "SET_PHYSICS_IMPOSTOR",
     SET_DRAG_BEHAVIOUR: "SET_DRAG_BEHAVIOUR",
@@ -60,6 +63,8 @@ const state = {
     ground: null,
     walls: [],
     canvas: null,
+    playing: true,
+    physicsImpostors: [],
 
     dragBehaviour: [],
     physicsImpostor: null,
@@ -104,6 +109,15 @@ const mutations = {
     },
     [types.SET_CANVAS](state, data) {
         state.canvas = data
+    },
+    [types.SET_PLAYING](state, data) {
+        state.playing = data
+    },
+    [types.SET_MESH_IMPOSTORS](state, data) {
+        state.physicsImpostors = data
+    },
+    [types.UPDATE_MESH_IMPOSTORS](state, data) {
+        state.physicsImpostors.push(data);
     },
 
     [types.SET_PHYSICS_IMPOSTOR](state, data) {
@@ -192,6 +206,15 @@ const mutations = {
         var meshLog = state.logs.find(x => x.name === data.mesh).log;
         var group = meshLog.filter(x => x.type === data.log.type);
         var oldLog = group.find(x => x.key === data.log.key);
+        if (oldLog.type === "physics") {
+            switch (oldLog.key) {
+                case "velocity":
+                    oldLog = group.find(x => x.properties.axis === data.log.properties.axis && x.properties.time.start === data.log.properties.time.start);
+                    break;
+                default:
+                    break;
+            }
+        }
         var newMeshLog = arrayRemove(meshLog, oldLog);
         newMeshLog.push(data.log);
         state.logs.find(x => x.name === data.mesh).log = newMeshLog;

@@ -17,6 +17,18 @@ export default {
                 console.error("Invalid type of mesh!");
                 return;
         }
+        var playing = store.state.experiment.playing;
+        if (playing === false) {
+            var physicsImpostor = {
+                name: properties.name,
+                mass: properties.mass,
+                type: newMesh.physicsImpostor.type,
+                velocity: newMesh.physicsImpostor.getLinearVelocity()
+            };
+            store.commit("experiment/UPDATE_MESH_IMPOSTORS", physicsImpostor);
+            newMesh.physicsImpostor.dispose();
+        }
+
         this.addMeshLabel(newMesh);
         this.enableWallRestrictions(newMesh);
         var physic = {
@@ -38,6 +50,22 @@ export default {
         store.commit("experiment/DELETE_MESH_PHYSICS", name);
         store.commit("experiment/DELETE_MESH_AXIS", name);
         store.commit("experiment/DELETE_MESH_LOGS", name);
+    },
+    findEmptyPosition(mesh) {
+        var scene = store.state.experiment.scene;
+        var ground = store.state.experiment.ground;
+        var groundSize = ground.getBoundingInfo().boundingBox.extendSize;
+
+        for (var z = -groundSize.z; z <= groundSize.z; z += 0.1) {
+            for (var x = -groundSize.x; x <= groundSize.x; x += 0.1) {
+                mesh.position.x = x;
+                mesh.position.z = z;
+                scene.render();
+                if (this.checkCollisions(mesh, mesh.name) === false) {
+                    return;
+                }
+            }
+        }
     },
     addMeshLabel(mesh) {
         var plane = this.makeTextPlane(mesh.name, "white", 1);
@@ -65,13 +93,16 @@ export default {
         }
     },
     addDragBehaviour(mesh, axis, first) {
+        var playing = store.state.experiment.playing;
         if (first === true) {
-            var physicsImpostor = {
-                mass: mesh.physicsImpostor.mass,
-                type: mesh.physicsImpostor.type
-            };
-            store.commit("experiment/SET_PHYSICS_IMPOSTOR", physicsImpostor);
-            mesh.physicsImpostor.dispose();
+            if (playing === true) {
+                var physicsImpostor = {
+                    mass: mesh.physicsImpostor.mass,
+                    type: mesh.physicsImpostor.type
+                };
+                store.commit("experiment/SET_PHYSICS_IMPOSTOR", physicsImpostor);
+                mesh.physicsImpostor.dispose();
+            }
             var lastPosition = {
                 x: mesh.position.x,
                 y: mesh.position.y,
@@ -92,17 +123,20 @@ export default {
             mesh.removeBehavior(dragBehaviour);
         })
 
-        if (permanent === true) {
-            var scene = store.state.experiment.scene;
-            var physicsImpostor = store.state.experiment.physicsImpostor;
-            mesh.physicsImpostor = new BABYLON.PhysicsImpostor(
-                mesh,
-                physicsImpostor.type, {
-                    mass: physicsImpostor.mass,
-                },
-                scene
-            );
-            store.commit("experiment/SET_PHYSICS_IMPOSTOR", null);
+        var playing = store.state.experiment.playing;
+        if (permanent === true && playing === true) {
+            if (playing === true) {
+                var scene = store.state.experiment.scene;
+                var physicsImpostor = store.state.experiment.physicsImpostor;
+                mesh.physicsImpostor = new BABYLON.PhysicsImpostor(
+                    mesh,
+                    physicsImpostor.type, {
+                        mass: physicsImpostor.mass,
+                    },
+                    scene
+                );
+                store.commit("experiment/SET_PHYSICS_IMPOSTOR", null);
+            }
             store.dispatch("experiment/createWalls");
         }
     },
@@ -151,7 +185,7 @@ export default {
         var meshes = allMeshes.filter(x => x != name);
         for (var i in meshes) {
             var obj = store.getters["experiment/getMeshByName"](meshes[i]);
-            if (mesh.intersectsMesh(obj, false)) {
+            if (mesh.intersectsMesh(obj, true)) {
                 return true;
             }
         }

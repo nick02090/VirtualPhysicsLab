@@ -125,7 +125,8 @@ export default {
     computed: {
         ...mapGetters({
             getMeshByName: "experiment/getMeshByName",
-            getMeshPhysic: "experiment/getMeshPhysic"
+            getMeshPhysic: "experiment/getMeshPhysic",
+            getMeshLog: "experiment/getMeshLog"
         }),
         ...mapState({
             existingMeshes: state => state.experiment.meshes
@@ -189,26 +190,36 @@ export default {
             };
             this.$store.commit("experiment/UPDATE_MESH_PHYSICS", meshPhysic);
             var values = [];
+            let startTime = Date.now();
             switch (physic.properties.axisString) {
                 case "x":
                     values.push({
-                        x: physic.properties.value,
-                        y: 0,
-                        z: 0
+                        velocity: {
+                            x: physic.properties.value,
+                            y: 0,
+                            z: 0
+                        },
+                        time: startTime
                     });
                     break;
                 case "y":
                     values.push({
-                        x: 0,
-                        y: physic.properties.value,
-                        z: 0
+                        velocity: {
+                            x: 0,
+                            y: physic.properties.value,
+                            z: 0
+                        },
+                        time: startTime
                     });
                     break;
                 case "z":
                     values.push({
-                        x: 0,
-                        y: physic.properties.value,
-                        z: 0
+                        velocity: {
+                            x: 0,
+                            y: physic.properties.value,
+                            z: 0
+                        },
+                        time: startTime
                     });
                     break;
                 default:
@@ -233,7 +244,17 @@ export default {
                     }
                 }
             };
-            this.$store.commit("experiment/SET_MESH_LOGS", meshLog);
+            var logs = this.getMeshLog(this.mesh).filter(
+                x => x.type === "physics" && x.key === "velocity"
+            );
+            var log = logs.find(
+                x =>
+                    x.properties.axis === physic.properties.axis &&
+                    x.properties.time.end === null
+            );
+            if (log === undefined) {
+                this.$store.commit("experiment/SET_MESH_LOGS", meshLog);
+            }
             this.isModalActive = false;
             babylon.addPhysic(this.getMeshByName(this.mesh), physic);
         },

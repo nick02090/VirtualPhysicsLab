@@ -34,6 +34,7 @@
                         controls-position="compact"
                         controls-rounded
                         type="is-success"
+                        :editable="false"
                     ></b-numberinput>
                 </b-field>
             </b-tooltip>

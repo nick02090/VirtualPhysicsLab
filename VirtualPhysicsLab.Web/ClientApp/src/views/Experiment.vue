@@ -3,7 +3,12 @@
         <div class="tile is-ancestor">
             <div class="tile is-parent is-3 has-text-left">
                 <article class="tile is-child box">
-                    <Menu @notification="notification" @error="error"/>
+                    <Menu
+                        @notification="notification"
+                        @error="error"
+                        @unlockPlaying="unlockPlaying"
+                        @lockPlaying="lockPlaying"
+                    />
                 </article>
             </div>
             <div class="tile is-parent">
@@ -14,6 +19,40 @@
                 </article>
             </div>
         </div>
+        <div class="tile is-ancestor">
+            <div class="tile is-parent is-3">
+                <article class="tile is-child box">
+                    <b-tooltip
+                        type="is-black"
+                        label="Zaustavi fiziku."
+                        position="is-right"
+                        v-if="isPlaying"
+                    >
+                        <b-button
+                            class="is-success"
+                            size="is-small"
+                            icon-left="pause"
+                            :disabled="isDisabled"
+                            @click="togglePlay(false)"
+                        ></b-button>
+                    </b-tooltip>
+                    <b-tooltip
+                        type="is-black"
+                        label="Pokreni fiziku."
+                        position="is-right"
+                        v-if="!isPlaying"
+                    >
+                        <b-button
+                            class="is-success"
+                            size="is-small"
+                            icon-left="play"
+                            :disabled="isDisabled"
+                            @click="togglePlay(true)"
+                        ></b-button>
+                    </b-tooltip>
+                </article>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -21,12 +60,14 @@
 import colors from "@/helpers/colors.js";
 import babylon from "@/helpers/babylon/babylon.js";
 import Menu from "@/components/experiment/Menu.vue";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 export default {
     name: "Experiment",
     data() {
-        return {};
+        return {
+            isDisabled: false
+        };
     },
     components: {
         Menu
@@ -35,6 +76,9 @@ export default {
         this.initScene();
     },
     computed: {
+        ...mapState({
+            isPlaying: state => state.experiment.playing
+        }),
         scene: {
             get: function() {
                 return this.$store.state.experiment.scene;
@@ -48,6 +92,16 @@ export default {
         ...mapActions({
             createWalls: "experiment/createWalls"
         }),
+        unlockPlaying() {
+            this.isDisabled = false;
+        },
+        lockPlaying() {
+            this.isDisabled = true;
+        },
+        togglePlay(data) {
+            this.$store.commit("experiment/SET_PLAYING", data);
+            babylon.togglePlay(data);
+        },
         initScene() {
             var canvas = document.getElementById("renderCanvas");
             var engine = new BABYLON.Engine(canvas, true);

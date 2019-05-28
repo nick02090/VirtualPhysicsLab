@@ -6,6 +6,7 @@ import Babylon from 'babylonjs'
 import router from './router'
 import store from './store/index.js'
 import VeeValidate from 'vee-validate'
+import VueApexCharts from 'vue-apexcharts';
 
 Vue.config.productionTip = false
 
@@ -16,6 +17,8 @@ Vue.use(Buefy, {
 Vue.use(Babylon);
 
 Vue.use(VeeValidate);
+
+Vue.component('apexchart', VueApexCharts);
 
 new Vue({
   router,

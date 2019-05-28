@@ -88,6 +88,10 @@
                 </div>
             </div>
         </div>
+        <b-loading :is-full-page="true" :active="isLoading">
+            <b-icon pack="fas" icon="sync-alt" size="is-medium" custom-class="fa-spin"></b-icon>
+            <h1 class="title is-4 loading-title">Kreiranje i postavljanje elementa na scenu.</h1>
+        </b-loading>
     </div>
 </template>
 
@@ -97,12 +101,13 @@ import colors from "@/helpers/colors.js";
 import * as meshTypes from "@/helpers/babylon/mesh/mesh-types.js";
 import { mapGetters, mapState } from "vuex";
 import MyColorPicker from "@/components/shared/MyColorPicker.vue";
-import { clearInterval } from "timers";
+import { clearInterval, setTimeout } from "timers";
 
 export default {
     name: "NoviElement",
     data() {
         return {
+            isLoading: false,
             meshType: meshTypes.BOX,
             meshTypes: meshTypes,
             mesh: null,
@@ -119,6 +124,7 @@ export default {
     },
     beforeDestroy() {
         if (this.stage === 1 && !this.isSuccess) {
+            this.$emit("unlockPlaying");
             this.deleteMesh();
             this.error("Element nije uspješno dodan!");
         }
@@ -178,13 +184,29 @@ export default {
             }
         },
         back() {
+            this.$emit("unlockPlaying");
             this.deleteMesh();
             this.stage = 0;
         },
         finish() {
             babylon.toggleHighlight(this.getMeshByName(this.mesh));
             babylon.removeDragBehaviours(this.getMeshByName(this.mesh), true);
+            var meshLog = {
+                mesh: this.mesh,
+                log: {
+                    name: "Stvoren element",
+                    icon: "fas fa-plus",
+                    type: "life",
+                    key: this.mesh,
+                    description: `(${this.mesh})`,
+                    properties: {
+                        time: Date.now()
+                    }
+                }
+            };
+            this.$store.commit("experiment/SET_MESH_LOGS", meshLog);
             this.isSuccess = true;
+            this.$emit("unlockPlaying");
             this.notification(
                 `Uspješno ste stvorili novi element: ${this.mesh}`
             );
@@ -237,6 +259,19 @@ export default {
                 this.axis,
                 true
             );
+
+            const positioning = () => {
+                return new Promise(async reslove => {
+                    babylon.findEmptyPosition(mesh);
+
+                    reslove();
+                });
+            };
+            this.isLoading = true;
+            await positioning();
+            this.isLoading = false;
+
+            this.$emit("lockPlaying");
         },
         notification(msg) {
             this.$emit("notification", msg);
@@ -259,4 +294,8 @@ export default {
 </script>
 
 <style scoped>
+.loading-title {
+    margin: 5px;
+    color: black;
+}
 </style>

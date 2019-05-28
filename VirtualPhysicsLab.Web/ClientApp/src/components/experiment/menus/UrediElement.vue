@@ -142,6 +142,7 @@ export default {
             if (this.hasCollisions) {
                 babylon.setMeshToLastPosition(this.getMeshByName(this.mesh));
             }
+            this.$emit("unlockPlaying");
             this.switchDrag();
         }
         if (this.mesh) {
@@ -260,14 +261,16 @@ export default {
             }
         },
         switchDrag(value) {
-            var msg = `Fizika tijela (${this.mesh}) je isključena.`;
+            var msg = `Pomicanje tijela (${this.mesh}) je omogućeno.`;
             if (!value) {
                 babylon.removeDragBehaviours(
                     this.getMeshByName(this.mesh),
                     true
                 );
-                msg = `Fizika djeluje na tijelo (${this.mesh}).`;
+                this.$emit("unlockPlaying");
+                msg = `Pomicanje tijela (${this.mesh}). je onemogućeno.`;
             } else {
+                this.$emit("lockPlaying");
                 babylon.addDragBehaviour(
                     this.getMeshByName(this.mesh),
                     this.axis,

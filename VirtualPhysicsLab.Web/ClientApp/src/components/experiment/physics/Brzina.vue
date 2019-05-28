@@ -35,7 +35,8 @@ export default {
             let isValid = await this.validate();
             if (!isValid) return;
 
-            var axisString = this.axis === 0 ? "x" : "z";
+            var axisString =
+                this.axis === 0 ? "x" : this.axis === 1 ? "y" : "z";
 
             var physic = {
                 name: "Brzina",

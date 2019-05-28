@@ -39,6 +39,8 @@
                             @changeMenu="changeMenu"
                             @notification="notification"
                             @error="error"
+                            @unlockPlaying="unlockPlaying"
+                            @lockPlaying="lockPlaying"
                         ></component>
                     </span>
                 </p>
@@ -130,6 +132,12 @@ export default {
         })
     },
     methods: {
+        unlockPlaying() {
+            this.$emit("unlockPlaying");
+        },
+        lockPlaying() {
+            this.$emit("lockPlaying");
+        },
         changeMenu(menuData) {
             this.isMenu = !this.isMenu;
             if (menuData.groupName && menuData.menuName) {
@@ -194,7 +202,7 @@ export default {
                     this.updateMeshVelocity(velocity, axis, name, Date.now());
                 }
             } else {
-                var axisString = axis === 0 ? "x" : "z";
+                var axisString = axis === 0 ? "x" : axis === 1 ? "y" : "z";
                 var physic = {
                     name: "Brzina",
                     icon: "fas fa-running",
@@ -211,6 +219,7 @@ export default {
             }
         },
         updateMeshVelocity(velocity, axis, name, endTime) {
+            var axisString = axis === 0 ? "x" : axis === 1 ? "y" : "z";
             var logs = this.getMeshLog(name).filter(
                 x => x.type === "physics" && x.key === "velocity"
             );
@@ -220,9 +229,11 @@ export default {
             );
             if (log) {
                 var newValues = log.properties.values;
-                newValues.push(velocity);
+                newValues.push({
+                    velocity: velocity,
+                    time: Date.now()
+                });
                 var startTime = log.properties.time.start;
-                var axisString = axis === 0 ? "x" : "z";
                 var meshLog = {
                     mesh: name,
                     log: {
@@ -243,6 +254,35 @@ export default {
                     }
                 };
                 this.$store.commit("experiment/UPDATE_MESH_LOGS", meshLog);
+            } else {
+                if (Math.abs(velocity[axisString]) > 0.2) {
+                    var values = [];
+                    var startTime = Date.now();
+                    values.push({
+                        velocity: velocity,
+                        time: startTime
+                    });
+                    var meshLog = {
+                        mesh: name,
+                        log: {
+                            name: "Dodana fizika",
+                            icon: "fas fa-atom",
+                            type: "physics",
+                            key: "velocity",
+                            description: `(${axisString}-os)`,
+                            properties: {
+                                axis: axis,
+                                axisString: axisString,
+                                values: values,
+                                time: {
+                                    start: startTime,
+                                    end: null
+                                }
+                            }
+                        }
+                    };
+                    this.$store.commit("experiment/SET_MESH_LOGS", meshLog);
+                }
             }
         },
         updateMeshPhysics(name, physic) {

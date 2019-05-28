@@ -15,6 +15,9 @@ export default {
     addMesh(type, properties, material, scene) {
         return mesh.create(type, properties, material, scene);
     },
+    findEmptyPosition(obj) {
+        mesh.findEmptyPosition(obj);
+    },
     addPhysic(obj, physic) {
         physics.addPhysic(obj, physic);
     },
@@ -29,6 +32,38 @@ export default {
     },
     deleteMesh(obj, name) {
         mesh.delete(obj, name);
+    },
+    togglePlay(data) {
+        if (data === false) {
+            var existingMeshes = store.state.experiment.meshes;
+            var physicsImpostors = [];
+            for (var i in existingMeshes) {
+                var mesh = store.getters["experiment/getMeshByName"](existingMeshes[i]);
+                var physicsImpostor = {
+                    name: existingMeshes[i],
+                    mass: mesh.physicsImpostor.mass,
+                    type: mesh.physicsImpostor.type,
+                    velocity: mesh.physicsImpostor.getLinearVelocity()
+                };
+                physicsImpostors.push(physicsImpostor);
+                mesh.physicsImpostor.dispose();
+            }
+            store.commit("experiment/SET_MESH_IMPOSTORS", physicsImpostors);
+        } else {
+            var scene = store.state.experiment.scene;
+            var physicsImpostors = store.state.experiment.physicsImpostors;
+            for (var i in physicsImpostors) {
+                var obj = store.getters["experiment/getMeshByName"](physicsImpostors[i].name);
+                obj.physicsImpostor = new BABYLON.PhysicsImpostor(
+                    obj,
+                    physicsImpostors[i].type, {
+                        mass: physicsImpostors[i].mass,
+                    },
+                    scene
+                );
+                obj.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(parseFloat(physicsImpostors[i].velocity.x), parseFloat(physicsImpostors[i].velocity.y), parseFloat(physicsImpostors[i].velocity.z)));
+            }
+        }
     },
     showMeshAxis(name) {
         var obj = store.getters["experiment/getMeshByName"](name);
@@ -194,6 +229,8 @@ export default {
         var start = new BABYLON.Vector3(-10, -1, -10);
         var axis = this.createAxis(start, 5, scene);
         store.commit("experiment/SET_AXIS", axis);
+
+        store.commit("experiment/SET_PLAYING", true);
 
         return scene;
     }

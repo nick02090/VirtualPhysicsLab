@@ -39,6 +39,30 @@
                 </b-field>
             </b-tooltip>
         </div>
+        <div class="field">
+            <label class="label">Položaj kamere</label>
+            <div class="buttons">
+                <b-button
+                    class="is-success"
+                    rounded
+                    icon-left="arrow-down"
+                    @click="cameraView('down')"
+                >z-x</b-button>
+                <b-button
+                    class="is-success"
+                    rounded
+                    icon-left="arrow-left"
+                    @click="cameraView('left')"
+                >y-z</b-button>
+                <b-button
+                    class="is-success"
+                    rounded
+                    icon-left="arrow-up"
+                    @click="cameraView('up')"
+                >y-x</b-button>
+                <b-button class="is-success" rounded icon-left="home" @click="cameraView('home')"></b-button>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -58,7 +82,8 @@ export default {
         ...mapState({
             currentAxis: state => state.experiment.axis,
             currentWalls: state => state.experiment.walls,
-            ground: state => state.experiment.ground
+            ground: state => state.experiment.ground,
+            camera: state => state.experiment.camera
         }),
         hasAxis: {
             get: function() {
@@ -116,6 +141,24 @@ export default {
                 this.createWalls();
             } else {
                 this.deleteWalls();
+            }
+        },
+        cameraView(view) {
+            switch (view) {
+                case "down":
+                    this.camera.setPosition(new BABYLON.Vector3(5, 30, 0));
+                    break;
+                case "left":
+                    this.camera.setPosition(new BABYLON.Vector3(25, -0.5, 0));
+                    break;
+                case "up":
+                    this.camera.setPosition(new BABYLON.Vector3(0, -0.5, -25));
+                    break;
+                case "home":
+                    this.camera.setPosition(new BABYLON.Vector3(10, 6, -20));
+                    break;
+                default:
+                    break;
             }
         }
     }

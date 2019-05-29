@@ -19,12 +19,26 @@
                         v-model="properties.mass"
                         icon="weight-hanging"
                         name="mass"
-                        v-validate="'required|decimal|min_value:0'"
+                        v-validate="'required|decimal|min_value:0.01'"
                         expanded
                     ></b-input>
                     <p class="control">
                         <span class="button is-static">kg</span>
                     </p>
+                </b-field>
+                <b-field class="has-text-centered">
+                    <b-tooltip type="is-black" label="Faktor trenja">
+                        <b-numberinput
+                            :step="0.01"
+                            v-model="properties.friction"
+                            :min="0"
+                            controls-position="compact"
+                            controls-rounded
+                            type="is-success"
+                            :editable="false"
+                            expanded
+                        ></b-numberinput>
+                    </b-tooltip>
                 </b-field>
                 <my-color-picker @input="updateColor"></my-color-picker>
             </div>
@@ -117,7 +131,8 @@ export default {
             isSuccess: false,
             properties: {
                 name: "",
-                mass: 1
+                mass: 1,
+                friction: 0.1
             },
             color: "#284E7B"
         };

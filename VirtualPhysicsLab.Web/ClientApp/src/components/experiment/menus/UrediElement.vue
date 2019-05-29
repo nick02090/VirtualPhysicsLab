@@ -52,11 +52,11 @@
                 </div>
             </div>
             <div class="field">
-                <label class="label">Rotacija (os Y)</label>
+                <label class="label">Rotacija (os X)</label>
                 <b-field>
                     <b-field>
                         <b-tooltip label="Stupnjevi" type="is-black">
-                            <b-input v-model="rotation.d"></b-input>
+                            <b-input v-model="rotation.x.d" type="number" @input="setRotation(0)"></b-input>
                         </b-tooltip>
                         <p class="control">
                             <span class="button is-static">°</span>
@@ -65,8 +65,10 @@
                     <b-field>
                         <b-tooltip label="Minute" type="is-black">
                             <b-input
-                                v-model="rotation.m"
+                                v-model="rotation.x.m"
                                 name="minutes"
+                                type="number"
+                                @input="setRotation(0)"
                                 v-validate="'numeric|min_value:0|max_value:59'"
                             ></b-input>
                         </b-tooltip>
@@ -77,8 +79,10 @@
                     <b-field>
                         <b-tooltip label="Sekunde" type="is-black">
                             <b-input
-                                v-model="rotation.s"
+                                v-model="rotation.x.s"
                                 name="seconds"
+                                type="number"
+                                @input="setRotation(0)"
                                 v-validate="'numeric|min_value:0|max_value:59'"
                             ></b-input>
                         </b-tooltip>
@@ -87,7 +91,103 @@
                         </p>
                     </b-field>
                     <b-tooltip label="Resetiraj" type="is-black">
-                        <button class="button is-warning" @click="resetRotation">
+                        <button class="button is-warning" @click="resetRotation(0)">
+                            <span class="icon">
+                                <i class="fas fa-redo"></i>
+                            </span>
+                        </button>
+                    </b-tooltip>
+                </b-field>
+            </div>
+            <div class="field">
+                <label class="label">Rotacija (os Y)</label>
+                <b-field>
+                    <b-field>
+                        <b-tooltip label="Stupnjevi" type="is-black">
+                            <b-input v-model="rotation.y.d" type="number" @input="setRotation(1)"></b-input>
+                        </b-tooltip>
+                        <p class="control">
+                            <span class="button is-static">°</span>
+                        </p>
+                    </b-field>
+                    <b-field>
+                        <b-tooltip label="Minute" type="is-black">
+                            <b-input
+                                v-model="rotation.y.m"
+                                name="minutes"
+                                type="number"
+                                @input="setRotation(1)"
+                                v-validate="'numeric|min_value:0|max_value:59'"
+                            ></b-input>
+                        </b-tooltip>
+                        <p class="control">
+                            <span class="button is-static">'</span>
+                        </p>
+                    </b-field>
+                    <b-field>
+                        <b-tooltip label="Sekunde" type="is-black">
+                            <b-input
+                                v-model="rotation.y.s"
+                                name="seconds"
+                                type="number"
+                                @input="setRotation(1)"
+                                v-validate="'numeric|min_value:0|max_value:59'"
+                            ></b-input>
+                        </b-tooltip>
+                        <p class="control">
+                            <span class="button is-static">"</span>
+                        </p>
+                    </b-field>
+                    <b-tooltip label="Resetiraj" type="is-black">
+                        <button class="button is-warning" @click="resetRotation(1)">
+                            <span class="icon">
+                                <i class="fas fa-redo"></i>
+                            </span>
+                        </button>
+                    </b-tooltip>
+                </b-field>
+            </div>
+            <div class="field">
+                <label class="label">Rotacija (os Z)</label>
+                <b-field>
+                    <b-field>
+                        <b-tooltip label="Stupnjevi" type="is-black">
+                            <b-input v-model="rotation.z.d" type="number" @input="setRotation(2)"></b-input>
+                        </b-tooltip>
+                        <p class="control">
+                            <span class="button is-static">°</span>
+                        </p>
+                    </b-field>
+                    <b-field>
+                        <b-tooltip label="Minute" type="is-black">
+                            <b-input
+                                v-model="rotation.z.m"
+                                name="minutes"
+                                type="number"
+                                @input="setRotation(2)"
+                                v-validate="'numeric|min_value:0|max_value:59'"
+                            ></b-input>
+                        </b-tooltip>
+                        <p class="control">
+                            <span class="button is-static">'</span>
+                        </p>
+                    </b-field>
+                    <b-field>
+                        <b-tooltip label="Sekunde" type="is-black">
+                            <b-input
+                                v-model="rotation.z.s"
+                                name="seconds"
+                                type="number"
+                                @input="setRotation(2)"
+                                v-validate="'numeric|min_value:0|max_value:59'"
+                            ></b-input>
+                        </b-tooltip>
+                        <p class="control">
+                            <span class="button is-static">"</span>
+                        </p>
+                    </b-field>
+                    <b-tooltip label="Resetiraj" type="is-black">
+                        <button class="button is-warning" @click="resetRotation(2)">
                             <span class="icon">
                                 <i class="fas fa-redo"></i>
                             </span>
@@ -123,15 +223,29 @@ export default {
             axis: 0,
             mesh: null,
             rotation: {
-                d: 0,
-                m: 0,
-                s: 0
+                x: {
+                    d: 0,
+                    m: 0,
+                    s: 0
+                },
+                y: {
+                    d: 0,
+                    m: 0,
+                    s: 0
+                },
+                z: {
+                    d: 0,
+                    m: 0,
+                    s: 0
+                }
             }
         };
     },
     mounted() {
         setInterval(() => {
-            this.setDMS();
+            this.setDMS(0);
+            this.setDMS(1);
+            this.setDMS(2);
         }, 1);
         setInterval(() => {
             this.checkCollisions();
@@ -210,38 +324,41 @@ export default {
             babylon.deleteMesh(obj, this.mesh);
             this.$store.commit("experiment/SET_DELETED_MESH", this.mesh);
         },
-        setCurrentRotation(rotation) {
+        setCurrentRotation(axis, rotation) {
             var mesh = this.getMeshByName(this.mesh);
-            var axis = new BABYLON.Vector3(0, 1, 0);
-            var angle = this.degreeToRadian(rotation);
-            var quaternion = new BABYLON.Quaternion.RotationAxis(axis, angle);
+            var quaternion = new BABYLON.Quaternion.RotationYawPitchRoll(
+                rotation.y,
+                rotation.x,
+                rotation.z
+            );
             mesh.rotationQuaternion = quaternion;
-            this.setDMS();
+            this.setDMS(axis);
         },
-        getCurrentRotation() {
+        getCurrentRotation(axisString) {
             var mesh = this.getMeshByName(this.mesh);
             if (mesh == undefined) return undefined;
             return this.radianToDegree(
-                mesh.rotationQuaternion.toEulerAngles().y
+                mesh.rotationQuaternion.toEulerAngles()[axisString]
             );
         },
-        setDMS() {
-            var rotation = this.getCurrentRotation();
+        setDMS(axis) {
+            var axisString = axis === 0 ? "x" : axis === 1 ? "y" : "z";
+            var rotation = this.getCurrentRotation(axisString);
             if (rotation == undefined) return;
             var deg = rotation.toFixed(2);
             if (Math.abs(deg).toFixed(2) == 0) deg = Math.abs(deg);
-            this.rotation.d = Math.floor(deg);
-            var minFloat = (deg - this.rotation.d) * 60;
-            this.rotation.m = Math.floor(minFloat);
-            var secFloat = (minFloat - this.rotation.m) * 60;
-            this.rotation.s = Math.floor(secFloat);
-            if (this.rotation.s == 60) {
-                this.rotation.s = 0;
-                this.rotation.m++;
+            this.rotation[axisString].d = Math.floor(deg);
+            var minFloat = (deg - this.rotation[axisString].d) * 60;
+            this.rotation[axisString].m = Math.floor(minFloat);
+            var secFloat = (minFloat - this.rotation[axisString].m) * 60;
+            this.rotation[axisString].s = Math.floor(secFloat);
+            if (this.rotation[axisString].s == 60) {
+                this.rotation[axisString].s = 0;
+                this.rotation[axisString].m++;
             }
-            if (this.rotation.m == 60) {
-                this.rotation.m = 0;
-                this.rotation.d++;
+            if (this.rotation[axisString].m == 60) {
+                this.rotation[axisString].m = 0;
+                this.rotation[axisString].d++;
             }
         },
         degreeToRadian(degrees) {
@@ -279,15 +396,31 @@ export default {
             }
             this.notification(msg);
         },
-        setRotation() {
-            var rotation =
-                Number(this.rotation.d) +
-                Number(this.rotation.m) / 60 +
-                Number(this.rotation.s) / 3600;
-            this.setCurrentRotation(rotation);
+        setRotation(axis) {
+            var x = this.degreeToRadian(
+                Number(this.rotation.x.d) +
+                    Number(this.rotation.x.m) / 60 +
+                    Number(this.rotation.x.s) / 3600
+            );
+            var y = this.degreeToRadian(
+                Number(this.rotation.y.d) +
+                    Number(this.rotation.y.m) / 60 +
+                    Number(this.rotation.y.s) / 3600
+            );
+            var z = this.degreeToRadian(
+                Number(this.rotation.z.d) +
+                    Number(this.rotation.z.m) / 60 +
+                    Number(this.rotation.z.s) / 3600
+            );
+            var rotation = { x: x, y: y, z: z };
+            this.setCurrentRotation(axis, rotation);
         },
-        resetRotation() {
-            this.setCurrentRotation(0);
+        resetRotation(axis) {
+            var axisString = axis === 0 ? "x" : axis === 1 ? "y" : "z";
+            this.rotation[axisString].d = 0;
+            this.rotation[axisString].m = 0;
+            this.rotation[axisString].s = 0;
+            this.setRotation(axis);
         },
         switchAxis(value) {
             if (value) {
@@ -317,15 +450,6 @@ export default {
                     this.axis
                 );
             }
-        },
-        "rotation.d": function() {
-            this.setRotation();
-        },
-        "rotation.m": function() {
-            this.setRotation();
-        },
-        "rotation.s": function() {
-            this.setRotation();
         },
         mesh(newMesh, previousMesh) {
             if (previousMesh) {

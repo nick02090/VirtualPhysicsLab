@@ -28,7 +28,6 @@ export default {
             store.commit("experiment/UPDATE_MESH_IMPOSTORS", physicsImpostor);
             newMesh.physicsImpostor.dispose();
         }
-
         this.addMeshLabel(newMesh);
         this.enableWallRestrictions(newMesh);
         var physic = {
@@ -175,6 +174,9 @@ export default {
                 if (mesh.position.y < -30) {
                     mesh.dispose();
                     store.commit("experiment/DELETE_MESH", mesh.name);
+                    store.commit("experiment/DELETE_MESH_PHYSICS", mesh.name);
+                    store.commit("experiment/DELETE_MESH_AXIS", mesh.name);
+                    store.commit("experiment/DELETE_MESH_LOGS", mesh.name);
                     store.commit("experiment/SET_DELETED_MESH", mesh.name);
                 }
             }

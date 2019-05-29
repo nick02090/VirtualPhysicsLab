@@ -17,6 +17,9 @@ export default {
                 case 0:
                     mesh.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(parseFloat(properties.value), 0, 0));
                     break;
+                case 1:
+                    mesh.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(0, parseFloat(properties.value), 0));
+                    break;
                 case 2:
                     mesh.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(0, 0, parseFloat(properties.value)));
                     break;
@@ -30,6 +33,9 @@ export default {
             switch (properties.axis) {
                 case 0:
                     newPhysicsImpostor.velocity.x = parseFloat(properties.value);
+                    break;
+                case 1:
+                    newPhysicsImpostor.velocity.y = parseFloat(properties.value);
                     break;
                 case 2:
                     newPhysicsImpostor.velocity.z = parseFloat(properties.value);

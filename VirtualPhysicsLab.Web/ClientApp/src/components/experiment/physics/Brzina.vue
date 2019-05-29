@@ -3,6 +3,7 @@
         <b-field label="Orijentacija" horizontal>
             <div class="block">
                 <b-radio v-model="axis" :native-value="0">x</b-radio>
+                <b-radio v-model="axis" :native-value="1">y</b-radio>
                 <b-radio v-model="axis" :native-value="2">z</b-radio>
             </div>
         </b-field>

@@ -54,14 +54,16 @@ export default {
             var physicsImpostors = store.state.experiment.physicsImpostors;
             for (var i in physicsImpostors) {
                 var obj = store.getters["experiment/getMeshByName"](physicsImpostors[i].name);
-                obj.physicsImpostor = new BABYLON.PhysicsImpostor(
-                    obj,
-                    physicsImpostors[i].type, {
-                        mass: physicsImpostors[i].mass,
-                    },
-                    scene
-                );
-                obj.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(parseFloat(physicsImpostors[i].velocity.x), parseFloat(physicsImpostors[i].velocity.y), parseFloat(physicsImpostors[i].velocity.z)));
+                if (obj) {
+                    obj.physicsImpostor = new BABYLON.PhysicsImpostor(
+                        obj,
+                        physicsImpostors[i].type, {
+                            mass: physicsImpostors[i].mass,
+                        },
+                        scene
+                    );
+                    obj.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(parseFloat(physicsImpostors[i].velocity.x), parseFloat(physicsImpostors[i].velocity.y), parseFloat(physicsImpostors[i].velocity.z)));
+                }
             }
         }
     },
@@ -177,14 +179,19 @@ export default {
 
         store.commit("experiment/SET_CAMERA", camera);
 
-        var light = new BABYLON.HemisphericLight(
-            "light",
-            new BABYLON.Vector3(0, 1, 0),
+        var hemLight1 = new BABYLON.HemisphericLight(
+            "hemLight1",
+            new BABYLON.Vector3(-0.5, 1, 0.5),
             scene
         );
-        light.intensity = 0.7;
+        hemLight1.intensity = 0.3;
 
-        store.commit("experiment/SET_LIGHT", light);
+        var hemLight2 = new BABYLON.HemisphericLight(
+            "hemLight2",
+            new BABYLON.Vector3(0.5, 1, -0.5),
+            scene
+        );
+        hemLight2.intensity = 0.3;
 
         var gravityVector = new BABYLON.Vector3(0, -9.81, 0);
         var physicsPlugin = new BABYLON.CannonJSPlugin();

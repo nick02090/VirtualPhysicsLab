@@ -34,7 +34,7 @@
                             icon-left="pause"
                             :disabled="isDisabled"
                             @click="togglePlay(false)"
-                        ></b-button>
+                        >Fizika uključena</b-button>
                     </b-tooltip>
                     <b-tooltip
                         type="is-black"
@@ -43,12 +43,12 @@
                         v-if="!isPlaying"
                     >
                         <b-button
-                            class="is-success"
+                            class="is-dark"
                             size="is-small"
                             icon-left="play"
                             :disabled="isDisabled"
                             @click="togglePlay(true)"
-                        ></b-button>
+                        >Fizika isključena</b-button>
                     </b-tooltip>
                 </article>
             </div>

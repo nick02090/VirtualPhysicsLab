@@ -26,7 +26,6 @@ const types = {
     UPDATE_MESHES: "UPDATE_MESHES",
     DELETE_MESH: "DELETE_MESH",
     SET_HIGHLIGHT: "SET_HIGHLIGHT",
-    SET_LIGHT: "SET_LIGHT",
     SET_CAMERA: "SET_CAMERA",
     SET_GROUND: "SET_GROUND",
     SET_WALLS: "SET_WALLS",
@@ -58,7 +57,6 @@ const state = {
     axis: [],
     meshes: [],
     highlight: null,
-    light: null,
     camera: null,
     ground: null,
     walls: [],
@@ -103,9 +101,6 @@ const mutations = {
     },
     [types.SET_WALLS](state, data) {
         state.walls = data
-    },
-    [types.SET_LIGHT](state, data) {
-        state.light = data
     },
     [types.SET_CANVAS](state, data) {
         state.canvas = data

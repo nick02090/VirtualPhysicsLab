@@ -14,7 +14,8 @@ export default {
         sphere.physicsImpostor = new BABYLON.PhysicsImpostor(
             sphere,
             BABYLON.PhysicsImpostor.SphereImpostor, {
-                mass: parseFloat(properties.mass)
+                mass: parseFloat(properties.mass),
+                friction: parseFloat(properties.friction)
             },
             scene
         );

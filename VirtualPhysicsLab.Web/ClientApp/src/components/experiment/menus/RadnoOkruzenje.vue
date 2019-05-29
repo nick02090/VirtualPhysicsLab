@@ -24,22 +24,6 @@
             </div>
         </div>
         <div class="field">
-            <label class="label">Faktor trenja</label>
-            <b-tooltip type="is-black" label="Faktor trenja podloge" position="is-right">
-                <b-field>
-                    <b-numberinput
-                        :step="0.01"
-                        v-model="friction"
-                        :min="0"
-                        controls-position="compact"
-                        controls-rounded
-                        type="is-success"
-                        :editable="false"
-                    ></b-numberinput>
-                </b-field>
-            </b-tooltip>
-        </div>
-        <div class="field">
             <label class="label">Položaj kamere</label>
             <div class="buttons">
                 <b-button
@@ -62,6 +46,49 @@
                 >y-x</b-button>
                 <b-button class="is-success" rounded icon-left="home" @click="cameraView('home')"></b-button>
             </div>
+        </div>
+        <div class="field">
+            <label class="label">Faktori trenja</label>
+            <b-field>
+                <b-tooltip
+                    type="is-black"
+                    label="Faktor trenja podloge i zidova"
+                    position="is-right"
+                >
+                    <b-numberinput
+                        :step="0.01"
+                        v-model="friction"
+                        min="0"
+                        controls-position="compact"
+                        controls-rounded
+                        type="is-success"
+                        :editable="false"
+                    ></b-numberinput>
+                </b-tooltip>
+                <b-icon icon="road" class="margin-5px"></b-icon>
+            </b-field>
+        </div>
+        <div class="field">
+            <label class="label">Koeficijenti elastičnosti</label>
+            <b-field>
+                <b-tooltip
+                    type="is-black"
+                    label="Koeficijent elastičnosti podloge i zidova"
+                    position="is-right"
+                >
+                    <b-numberinput
+                        :step="0.01"
+                        v-model="restitution"
+                        min="0"
+                        max="1"
+                        controls-position="compact"
+                        controls-rounded
+                        type="is-success"
+                        :editable="false"
+                    ></b-numberinput>
+                </b-tooltip>
+                <b-icon icon="expand-arrows-alt" class="margin-5px"></b-icon>
+            </b-field>
         </div>
     </div>
 </template>
@@ -113,6 +140,14 @@ export default {
             },
             set: function(value) {
                 this.ground.physicsImpostor.friction = value;
+            }
+        },
+        restitution: {
+            get: function() {
+                return this.ground.physicsImpostor.restitution;
+            },
+            set: function(value) {
+                this.ground.physicsImpostor.restitution = value;
             }
         },
         scene: {

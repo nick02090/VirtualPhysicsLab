@@ -62,4 +62,7 @@ a.is-active {
 .is-turquoise {
     background-color: hsl(171, 100%, 41%);
 }
+.margin-5px {
+    margin: 5px;
+}
 </style>

@@ -228,7 +228,7 @@ const actions = {
     }) {
         let scene = state.scene;
 
-        var northWall = BABYLON.MeshBuilder.CreateGround("northWall", {
+        var northWall = new BABYLON.MeshBuilder.CreateGround("northWall", {
             width: 20,
             height: 20
         }, scene);
@@ -245,7 +245,7 @@ const actions = {
             scene);
         northWall.visibility = false;
 
-        var westWall = BABYLON.MeshBuilder.CreateGround("westWall", {
+        var westWall = new BABYLON.MeshBuilder.CreateGround("westWall", {
             width: 20,
             height: 20
         }, scene);
@@ -262,7 +262,7 @@ const actions = {
             scene);
         westWall.visibility = false;
 
-        var eastWall = BABYLON.MeshBuilder.CreateGround("eastWall", {
+        var eastWall = new BABYLON.MeshBuilder.CreateGround("eastWall", {
             width: 20,
             height: 20
         }, scene);
@@ -279,7 +279,7 @@ const actions = {
             scene);
         eastWall.visibility = false;
 
-        var southWall = BABYLON.MeshBuilder.CreateGround("southWall", {
+        var southWall = new BABYLON.MeshBuilder.CreateGround("southWall", {
             width: 20,
             height: 20
         }, scene);

@@ -197,7 +197,7 @@ export default {
         var physicsPlugin = new BABYLON.CannonJSPlugin();
         scene.enablePhysics(gravityVector, physicsPlugin);
 
-        var ground = BABYLON.MeshBuilder.CreateBox("ground", {
+        var ground = new BABYLON.MeshBuilder.CreateBox("ground", {
             width: 20,
             height: 1,
             depth: 20

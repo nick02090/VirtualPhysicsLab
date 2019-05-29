@@ -26,7 +26,10 @@
                         <span class="button is-static">kg</span>
                     </p>
                 </b-field>
-                <b-field class="has-text-centered">
+                <b-field>
+                    <my-color-picker @input="updateColor"></my-color-picker>
+                </b-field>
+                <b-field>
                     <b-tooltip type="is-black" label="Faktor trenja">
                         <b-numberinput
                             :step="0.01"
@@ -39,8 +42,24 @@
                             expanded
                         ></b-numberinput>
                     </b-tooltip>
+                    <b-icon icon="road" class="margin-5px"></b-icon>
                 </b-field>
-                <my-color-picker @input="updateColor"></my-color-picker>
+                <b-field>
+                    <b-tooltip type="is-black" label="Koeficijent elastičnosti">
+                        <b-numberinput
+                            :step="0.01"
+                            v-model="properties.restitution"
+                            :min="0"
+                            :max="1"
+                            controls-position="compact"
+                            controls-rounded
+                            type="is-success"
+                            :editable="false"
+                            expanded
+                        ></b-numberinput>
+                    </b-tooltip>
+                    <b-icon icon="expand-arrows-alt" class="margin-5px"></b-icon>
+                </b-field>
             </div>
             <div class="field">
                 <label class="label">Vrsta oblika</label>
@@ -132,7 +151,8 @@ export default {
             properties: {
                 name: "",
                 mass: 1,
-                friction: 0.1
+                friction: 0.1,
+                restitution: 0.5
             },
             color: "#284E7B"
         };

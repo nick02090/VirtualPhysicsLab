@@ -15,7 +15,8 @@ export default {
             box,
             BABYLON.PhysicsImpostor.BoxImpostor, {
                 mass: parseFloat(properties.mass),
-                friction: parseFloat(properties.friction)
+                friction: parseFloat(properties.friction),
+                restitution: parseFloat(properties.restitution)
             },
             scene
         );

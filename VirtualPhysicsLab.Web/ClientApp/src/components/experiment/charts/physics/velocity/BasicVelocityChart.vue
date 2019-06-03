@@ -10,7 +10,7 @@
 
 <script>
 export default {
-    name: "BasicMovementChart",
+    name: "BasicVelocityChart",
     props: {
         height: {
             type: Number,
@@ -61,7 +61,7 @@ export default {
                             enabled: false
                         },
                         stroke: {
-                            curve: "stepline"
+                            curve: "straight"
                         },
                         grid: {
                             row: {

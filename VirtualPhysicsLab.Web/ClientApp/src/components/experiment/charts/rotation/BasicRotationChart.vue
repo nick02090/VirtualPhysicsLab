@@ -10,7 +10,7 @@
 
 <script>
 export default {
-    name: "BasicMovementChart",
+    name: "BasicRotationChart",
     props: {
         height: {
             type: Number,

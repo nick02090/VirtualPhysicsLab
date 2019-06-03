@@ -46,6 +46,9 @@ export default {
         return {
             graphType: 0,
             lifeTime: 0,
+            excel: {
+                data: []
+            },
             graphData: null,
             showGraph: false
         };
@@ -63,6 +66,8 @@ export default {
         this.lifeTime = lifeLog.properties.time;
         this.findCross(this.graphType);
         this.showGraph = true;
+        this.prepareExcel();
+        this.$emit("excel");
     },
     computed: {
         ...mapGetters({
@@ -97,6 +102,18 @@ export default {
                 default:
                     break;
             }
+        },
+        prepareExcel() {
+            this.excel.data = [
+                {
+                    Element1: this.mesh,
+                    Element2: this.log.properties.collider,
+                    Vrijeme: (
+                        (this.log.properties.time.start - this.lifeTime) /
+                        1000
+                    ).toFixed(2)
+                }
+            ];
         },
         emptyCross(allLogs) {
             var collisionTime = this.log.properties.time.start;

@@ -224,8 +224,9 @@ export default {
             this.stage = 0;
         },
         finish() {
-            babylon.toggleHighlight(this.getMeshByName(this.mesh));
-            babylon.removeDragBehaviours(this.getMeshByName(this.mesh), true);
+            var obj = this.getMeshByName(this.mesh);
+            babylon.toggleHighlight(obj);
+            babylon.removeDragBehaviours(obj, true);
             var meshLog = {
                 mesh: this.mesh,
                 log: {
@@ -235,7 +236,8 @@ export default {
                     key: this.mesh,
                     description: `(${this.mesh})`,
                     properties: {
-                        time: Date.now()
+                        time: Date.now(),
+                        position: obj.position
                     }
                 }
             };

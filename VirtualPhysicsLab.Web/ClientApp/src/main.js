@@ -7,6 +7,7 @@ import router from './router'
 import store from './store/index.js'
 import VeeValidate from 'vee-validate'
 import VueApexCharts from 'vue-apexcharts';
+import excel from 'vue-excel-export';
 
 Vue.config.productionTip = false
 
@@ -17,6 +18,8 @@ Vue.use(Buefy, {
 Vue.use(Babylon);
 
 Vue.use(VeeValidate);
+
+Vue.use(excel);
 
 Vue.component('apexchart', VueApexCharts);
 

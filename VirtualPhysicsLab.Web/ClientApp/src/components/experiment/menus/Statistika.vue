@@ -62,16 +62,14 @@
                 </template>
             </b-table>
 
-            <b-modal
-                v-if="selectedStatistic"
-                :active.sync="isModalActive"
-                scroll="keep"
-                @close="close"
-            >
+            <b-modal v-if="selectedStatistic" :active.sync="isModalActive" @close="close">
                 <header class="modal-card-head">
                     <p class="modal-card-title">
                         {{selectedStatistic.name}} - {{mesh}}
                         <span v-if="time">({{time}})</span>
+                        <span
+                            v-if="selectedStatistic.type != 'collisions'"
+                        >{{selectedLog.description}}</span>
                     </p>
                 </header>
                 <section class="modal-card-body">
@@ -81,25 +79,42 @@
                         ref="statistic"
                         :log="selectedLog"
                         :mesh="mesh"
+                        @excel="excelData"
                     ></component>
                 </section>
                 <footer class="modal-card-foot">
-                    <button class="button" type="button" @click="isModalActive = false">
-                        <span class="icon">
-                            <i class="fas fa-angle-left"></i>
-                        </span>
-                        <span>Nazad</span>
-                    </button>
-                    <button
-                        class="button is-success"
-                        @click="updateStatistics"
-                        :disabled="!isUpdateable"
-                    >
-                        <span class="icon">
-                            <i class="fas fa-redo"></i>
-                        </span>
-                        <span>Ažuriraj</span>
-                    </button>
+                    <div class="tile is-ancestor">
+                        <div class="tile">
+                            <button class="button" type="button" @click="isModalActive = false">
+                                <span class="icon">
+                                    <i class="fas fa-angle-left"></i>
+                                </span>
+                                <span>Nazad</span>
+                            </button>
+                            <button
+                                class="button is-success"
+                                @click="updateStatistics"
+                                :disabled="!isUpdateable"
+                            >
+                                <span class="icon">
+                                    <i class="fas fa-redo"></i>
+                                </span>
+                                <span>Ažuriraj</span>
+                            </button>
+                        </div>
+                        <div class="tile is-3">
+                            <div class="block margin-5px">
+                                <b-radio v-model="excel.type" :native-value="'xls'">.xls</b-radio>
+                                <b-radio v-model="excel.type" :native-value="'csv'">.csv</b-radio>
+                            </div>
+                            <button class="button is-success">
+                                <span class="icon">
+                                    <i class="fas fa-download"></i>
+                                </span>
+                                <export-excel :data="excel.data" :type="excel.type">Preuzmi</export-excel>
+                            </button>
+                        </div>
+                    </div>
                 </footer>
             </b-modal>
         </div>
@@ -116,7 +131,7 @@ import babylon from "@/helpers/babylon/babylon.js";
 import colors from "@/helpers/colors.js";
 import * as meshTypes from "@/helpers/babylon/mesh/mesh-types.js";
 import { mapGetters, mapState } from "vuex";
-import { setInterval } from "timers";
+import { setInterval, setTimeout } from "timers";
 
 export default {
     name: "Statistika",
@@ -130,6 +145,10 @@ export default {
             isUpdateable: false,
             time: null,
             isLoading: false,
+            excel: {
+                type: "xls",
+                data: []
+            },
             statistics: [
                 {
                     name: "Fizika",
@@ -244,11 +263,14 @@ export default {
         }
     },
     methods: {
+        excelData() {
+            this.excel.data = this.$refs.statistic.excel.data;
+        },
         close() {
             this.isModalActive = false;
             this.selectedStatistic = null;
         },
-        updateStatistics() {
+        async updateStatistics() {
             this.isLoading = true;
             this.isUpdateable = false;
             var allLogs = this.getMeshLog(this.mesh);
@@ -258,9 +280,11 @@ export default {
                     x.key === this.selectedLog.key
             );
             this.calculateTime();
+            await this.$refs.statistic.update();
             setTimeout(() => {
                 this.isLoading = false;
             }, 1000);
+            this.excel.data = this.$refs.statistic.excel.data;
         },
         globalSelection(value) {
             for (var i in this.logs) {

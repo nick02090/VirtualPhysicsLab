@@ -1,6 +1,6 @@
 <template>
     <div id="home">
-        <section class="hero is-info is-medium">
+        <section class="hero is-info is-medium is-bold">
             <div class="hero-body">
                 <div class="container">
                     <h2 class="subtitle">Dobrodošli u ...</h2>
@@ -8,7 +8,7 @@
                 </div>
             </div>
         </section>
-        <section class="hero is-light is-small">
+        <section class="hero is-light is-small is-bold">
             <div class="hero-body">
                 <div class="tile is-parent">
                     <article class="tile is-child box is-white">
@@ -33,7 +33,8 @@
                     </article>
                     <article class="tile is-child box is-white">
                         <h2 class="subtitle is-9">
-                            <span class="blue-text">PRIJAVITE</span> se kako biste spremili i dijelili pokuse.
+                            Na vlastitom
+                            <span class="blue-text">PROFILU</span> spremajte i dijelite pokuse.
                         </h2>
                         <br>
                         <span class="icon">
@@ -50,15 +51,26 @@
                             <i class="fas fa-flask fa-5x"></i>
                         </span>
                     </article>
-                    <article class="tile is-child box is-white">
-                        <h2 class="subtitle is-9">
-                            <span class="blue-text">UPUTE</span> za korištenje su uvijek pri ruci.
-                        </h2>
-                        <br>
-                        <span class="icon">
-                            <i class="fas fa-info fa-5x"></i>
-                        </span>
-                    </article>
+                </div>
+            </div>
+        </section>
+        <section class="hero is-dark is-small is-bold">
+            <div class="hero-body">
+                <div class="control is-flex">
+                    <p>
+                        Još nemaš izrađen profil?
+                        <router-link to="/register">
+                            <a>Registriraj se</a>
+                        </router-link>
+                    </p>
+                    <div class="control margin-left">
+                        <p>
+                            Već si izradio profil?
+                            <router-link to="/login">
+                                <a>Prijavi se</a>
+                            </router-link>
+                        </p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -80,5 +92,11 @@ i.fas {
 }
 span.blue-text {
     color: #284e7b;
+}
+a {
+    color: #6bafff;
+}
+a:hover {
+    color: white;
 }
 </style>

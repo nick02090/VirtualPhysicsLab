@@ -7,7 +7,7 @@
                 </router-link>
             </div>
             <quick-menu
-                :menu-count="4"
+                :menu-count="3"
                 :icon-class="icons"
                 :menu-url-list="urls"
                 position="top-right"
@@ -25,17 +25,11 @@ export default {
     name: "Navbar",
     data() {
         return {
-            icons: [
-                "fas fa-home",
-                "fas fa-user",
-                "fas fa-flask",
-                "fas fa-info"
-            ],
+            icons: ["fas fa-home", "fas fa-flask", "fas fa-user"],
             urls: [
                 { isLink: true, url: "/home" },
-                { isLink: true, url: "/profile" },
                 { isLink: true, url: "/experiment" },
-                { isLink: true, url: "/info" }
+                { isLink: true, url: "/profile" }
             ]
         };
     },

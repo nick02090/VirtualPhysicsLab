@@ -1,0 +1,135 @@
+<template>
+    <div id="register">
+        <section class="hero is-info is-bold">
+            <div class="hero-body">
+                <div class="container">
+                    <h1 class="title">Registracija</h1>
+                </div>
+            </div>
+        </section>
+        <section class="hero is-light is-bold">
+            <div class="hero-body">
+                <div class="tile is-parent">
+                    <div class="tile is-child is-4">
+                        <div class="control is-flex">
+                            <label class="label">Ime:</label>
+                            <div class="control margin-left">
+                                <b-input
+                                    v-model="name"
+                                    expanded
+                                    name="name"
+                                    v-validate="'required'"
+                                    icon="user"
+                                ></b-input>
+                            </div>
+                        </div>
+
+                        <div class="control is-flex">
+                            <label class="label">E-mail:</label>
+                            <div class="control margin-left">
+                                <b-input
+                                    type="email"
+                                    v-model="email"
+                                    expanded
+                                    name="email"
+                                    icon="envelope"
+                                    v-validate="'required|email'"
+                                ></b-input>
+                            </div>
+                        </div>
+
+                        <div class="control is-flex">
+                            <label class="label">Lozinka:</label>
+                            <div class="control margin-left">
+                                <b-input
+                                    type="password"
+                                    v-model="password"
+                                    password-reveal
+                                    expanded
+                                    name="password"
+                                    v-validate="'required|min:8'"
+                                ></b-input>
+                            </div>
+                        </div>
+
+                        <div class="control is-flex">
+                            <label class="label">Stručnost:</label>
+                            <div class="control margin-left">
+                                <div class="block">
+                                    <b-radio v-model="occupation" native-value="profesor">profesor</b-radio>
+                                    <b-radio v-model="occupation" native-value="student">student</b-radio>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="control is-flex">
+                            <div class="control margin-left">
+                                <b-button
+                                    type="is-success"
+                                    @click="register"
+                                    icon-left="check"
+                                >Registracija</b-button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tile is-child has-text-centered">
+                        <router-link to="/">
+                            <img src="@/assets/logo.png" width="225" height="28">
+                        </router-link>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="hero is-dark is-small is-bold">
+            <div class="hero-body">
+                <div class="control is-flex">
+                    <p>
+                        Već si izradio profil?
+                        <router-link to="/login">
+                            <a>Prijavi se</a>
+                        </router-link>
+                    </p>
+                    <div class="control margin-left"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+</template>
+
+<script>
+export default {
+    name: "Register",
+    data() {
+        return {
+            name: "",
+            email: "",
+            password: "",
+            occupation: "profesor"
+        };
+    },
+    methods: {
+        async validate() {
+            let validationOK = await this.$validator.validateAll();
+            return this.errors.any() == false && validationOK;
+        },
+        async register() {
+            let isValid = await this.validate();
+            if (!isValid) return;
+
+            this.$toast.open({
+                message: "Yaaaay!",
+                type: "is-success"
+            });
+        }
+    }
+};
+</script>
+
+<style scoped>
+a {
+    color: #6bafff;
+}
+a:hover {
+    color: white;
+}
+</style>

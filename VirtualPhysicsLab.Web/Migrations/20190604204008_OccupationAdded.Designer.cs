@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtualPhysicsLab.Web.Data;
 
 namespace VirtualPhysicsLab.Web.Migrations
 {
     [DbContext(typeof(VPLContext))]
-    partial class VPLContextModelSnapshot : ModelSnapshot
+    [Migration("20190604204008_OccupationAdded")]
+    partial class OccupationAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -161,8 +163,6 @@ namespace VirtualPhysicsLab.Web.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired();
-
-                    b.Property<string>("Token");
 
                     b.HasKey("Id");
 

@@ -12,6 +12,9 @@ export default {
     name: "App",
     components: {
         Navbar
+    },
+    async mounted() {
+        // await this.$store.dispatch("user/postUser");
     }
 };
 </script>

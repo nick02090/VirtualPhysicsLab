@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -5,7 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using VirtualPhysicsLab.Web.Data;
+using VirtualPhysicsLab.Web.Interfaces;
+using VirtualPhysicsLab.Web.Repositories;
+using VirtualPhysicsLab.Web.Services;
+using VirtualPhysicsLab.Web.Settings;
 
 namespace VirtualPhysicsLab.Web
 {
@@ -30,12 +37,50 @@ namespace VirtualPhysicsLab.Web
 
             services.AddDbContext<VPLContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DB")));
 
+
+            #region App Settings
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+
+            // configure jwt authentication
+            var appSettings = appSettingsSection.Get<AppSettings>();
+            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+            services.AddSingleton<IAppSettings>(appSettings);
+            #endregion
+
+            #region Connection Settings
+            var connectionSettings = new ConnectionSettings
+            {
+                ConnectionString = Configuration.GetConnectionString("VPL"),
+                DbConnectionString = Configuration.GetConnectionString("DB")
+            };
+
+            services.AddSingleton<IConnectionSettings>(connectionSettings);
+            #endregion
+
             #region Repositories
-            // Example: services.AddScoped<IXRepository, XRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
             #endregion
 
             #region Services
-            // Example: services.AddScoped<IXService, XService>();
+            services.AddScoped<IUserService, UserService>();
             #endregion
 
             services.AddHttpsRedirection(options =>

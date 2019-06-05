@@ -117,6 +117,8 @@
 </template>
 
 <script>
+import { mapState, mapGetters } from "vuex";
+
 export default {
     name: "Profile",
     data() {
@@ -170,6 +172,11 @@ export default {
     mounted() {
         this.pages = Math.ceil(this.user.experiments.length / this.batchSize);
         this.update();
+    },
+    computed: {
+        ...mapGetters({
+            isLoggedIn: "user/isLoggedIn"
+        })
     },
     methods: {
         previous() {

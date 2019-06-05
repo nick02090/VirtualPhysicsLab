@@ -50,9 +50,9 @@ namespace VirtualPhysicsLab.Web.Repositories
             return await VPLContext.Users.Where(x => x.Email.Equals(email)).SingleOrDefaultAsync();
         }
 
-        public async Task<User> GetByNicknameAsync(string nickname)
+        public async Task<User> GetByTokenAsync(string token)
         {
-            return await VPLContext.Users.Where(x => x.NickName.Equals(nickname)).SingleOrDefaultAsync();
+            return await VPLContext.Users.Where(x => x.Token.Equals(token)).SingleOrDefaultAsync();
         }
 
         public async Task<User> UpdateAsync(User entity)

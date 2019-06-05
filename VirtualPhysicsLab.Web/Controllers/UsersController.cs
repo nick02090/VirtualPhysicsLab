@@ -57,6 +57,16 @@ namespace VirtualPhysicsLab.Web.Controllers
 
             return Ok(user);
         }
+        
+        [HttpGet("token")]
+        public async Task<IActionResult> GetUserByToken([FromQuery] string token)
+        {
+            var user = await UserRepository.GetByTokenAsync(token);
+
+            user.Password = null;
+
+            return Ok(user);
+        }
 
         // PUT: api/Users/5
         [HttpPut("{id}")]
@@ -81,11 +91,11 @@ namespace VirtualPhysicsLab.Web.Controllers
         [HttpPost("authenticate")]
         public async Task<IActionResult> Authenticate([FromBody] User user)
         {
-            var result = await UserService.Authenticate(user.NickName, user.Password);
+            var result = await UserService.Authenticate(user.Email, user.Password);
 
             if (result == null)
             {
-                return BadRequest(new { message = "Username or password is incorrect" });
+                return Ok(null);
             }
 
             result.Password = null;
@@ -93,10 +103,30 @@ namespace VirtualPhysicsLab.Web.Controllers
             return Ok(result);
         }
 
+        [AllowAnonymous]
+        [HttpPost("check-availability")]
+        public async Task<IActionResult> CheckAvailability([FromBody] User user)
+        {
+            var result = await UserService.CheckAvailability(user.Email);
+
+            return Ok(result);
+        }
+
+        [HttpGet("logout")]
+        public async Task<IActionResult> Logout([FromQuery] string token)
+        {
+            await UserService.Logout(token);
+
+            return Ok();
+        }
+
         // POST: api/Users
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> PostUser([FromBody] User user)
         {
+            user.LogicalName = "user";
+            user.Name = user.FullName;
             user.CreatedOn = DateTime.Now;
             var password = user.Password;
             user.Password = _passwordHasher.HashPassword(password);

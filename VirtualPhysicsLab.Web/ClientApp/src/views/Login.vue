@@ -14,28 +14,32 @@
                         <div class="control is-flex">
                             <label class="label">E-mail:</label>
                             <div class="control margin-left">
-                                <b-input
-                                    type="email"
-                                    v-model="email"
-                                    expanded
-                                    name="email"
-                                    icon="envelope"
-                                    v-validate="'required|email'"
-                                ></b-input>
+                                <b-field :type="errors.has('email') ? 'is-danger' : ''">
+                                    <b-input
+                                        type="email"
+                                        v-model="email"
+                                        expanded
+                                        name="email"
+                                        icon="envelope"
+                                        v-validate="'required|email'"
+                                    ></b-input>
+                                </b-field>
                             </div>
                         </div>
 
                         <div class="control is-flex">
                             <label class="label">Lozinka:</label>
                             <div class="control margin-left">
-                                <b-input
-                                    type="password"
-                                    v-model="password"
-                                    password-reveal
-                                    expanded
-                                    name="password"
-                                    v-validate="'required|min:8'"
-                                ></b-input>
+                                <b-field :type="errors.has('password') ? 'is-danger' : ''">
+                                    <b-input
+                                        type="password"
+                                        v-model="password"
+                                        password-reveal
+                                        expanded
+                                        name="password"
+                                        v-validate="'required|min:8'"
+                                    ></b-input>
+                                </b-field>
                             </div>
                         </div>
 
@@ -52,6 +56,7 @@
                     </div>
                 </div>
             </div>
+            <b-loading :is-full-page="false" :active="isLoading"></b-loading>
         </section>
         <section class="hero is-dark is-small is-bold">
             <div class="hero-body">
@@ -70,6 +75,8 @@
 </template>
 
 <script>
+import { mapActions, mapState } from "vuex";
+
 export default {
     name: "Login",
     data() {
@@ -78,7 +85,15 @@ export default {
             password: ""
         };
     },
+    computed: {
+        ...mapState({
+            isLoading: state => state.user.loading
+        })
+    },
     methods: {
+        ...mapActions({
+            authenticate: "user/authenticate"
+        }),
         async validate() {
             let validationOK = await this.$validator.validateAll();
             return this.errors.any() == false && validationOK;
@@ -87,10 +102,25 @@ export default {
             let isValid = await this.validate();
             if (!isValid) return;
 
-            this.$toast.open({
-                message: "Yaaaay!",
-                type: "is-success"
-            });
+            var user = {
+                email: this.email,
+                password: this.password
+            };
+            let success = await this.authenticate(user);
+            if (success === true) {
+                this.$toast.open({
+                    message: "Uspješno ste se prijavili!",
+                    type: "is-success",
+                    position: "is-bottom"
+                });
+                this.$router.push("home");
+            } else {
+                this.$toast.open({
+                    message: "Neispravan e-mail ili lozinka!",
+                    type: "is-danger",
+                    position: "is-bottom"
+                });
+            }
         }
     }
 };

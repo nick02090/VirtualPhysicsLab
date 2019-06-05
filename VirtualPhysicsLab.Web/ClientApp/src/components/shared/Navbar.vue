@@ -2,9 +2,16 @@
     <div id="navbar">
         <section class="hero is-light is-flex">
             <div class="brand">
-                <router-link to="/">
-                    <img src="@/assets/logo.png" width="112" height="28">
-                </router-link>
+                <div class="control is-flex">
+                    <div v-if="isLoggedIn" class="control is-flex" style="display: inline-block">
+                        <b-button rounded outlined icon-left="sign-out-alt" @click="logout">Odjava</b-button>
+                    </div>
+                    <div class="control margin-right margin-left">
+                        <router-link to="/">
+                            <img src="@/assets/logo.png" width="112" height="28">
+                        </router-link>
+                    </div>
+                </div>
             </div>
             <quick-menu
                 :menu-count="3"
@@ -14,12 +21,14 @@
                 background-color="#284e7b"
                 ref="quickmenu"
             ></quick-menu>
+            <b-loading :is-full-page="true" :active="isLoading"></b-loading>
         </section>
     </div>
 </template>
 
 <script>
 import quickMenu from "vue-quick-menu";
+import { mapGetters, mapActions, mapState } from "vuex";
 
 export default {
     name: "Navbar",
@@ -33,8 +42,30 @@ export default {
             ]
         };
     },
+    computed: {
+        ...mapGetters({
+            isLoggedIn: "user/isLoggedIn"
+        }),
+        ...mapState({
+            isLoading: state => state.user.loading
+        })
+    },
     components: {
         quickMenu
+    },
+    methods: {
+        ...mapActions({
+            systemLogout: "user/logout"
+        }),
+        async logout() {
+            await this.systemLogout();
+            this.$toast.open({
+                message: "Uspješno ste se odjavili!",
+                type: "is-success",
+                position: "is-bottom"
+            });
+            this.$router.push("home");
+        }
     },
     watch: {
         $route(to, from) {

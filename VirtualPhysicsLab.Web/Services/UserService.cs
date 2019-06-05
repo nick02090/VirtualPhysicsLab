@@ -20,9 +20,9 @@ namespace VirtualPhysicsLab.Web.Services
             UserRepository = userRepository;
             AppSettings = appSettings;
         }
-        public async Task<User> Authenticate(string nickname, string password)
+        public async Task<User> Authenticate(string email, string password)
         {
-            var user = await UserRepository.GetByNicknameAsync(nickname);
+            var user = await UserRepository.GetByEmailAsync(email);
 
             if (user == null)
             {
@@ -50,10 +50,40 @@ namespace VirtualPhysicsLab.Web.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
             user.Token = tokenHandler.WriteToken(token);
 
+            await UserRepository.UpdateAsync(user);
+
             // remove password before returning
             user.Password = null;
 
             return user;
+        }
+
+        public async Task<bool> CheckAvailability(string email)
+        {
+            var user = await UserRepository.GetByEmailAsync(email);
+
+            if (user == null)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task Logout(string token)
+        {
+            var user = await UserRepository.GetByTokenAsync(token);
+
+            if (user == null)
+            {
+                return;
+            }
+
+            user.Token = null;
+
+            await UserRepository.UpdateAsync(user);
+
+            return;
         }
     }
 }

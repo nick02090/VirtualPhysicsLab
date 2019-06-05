@@ -21,7 +21,7 @@
                             <i class="fas fa-bars fa-5x"></i>
                         </span>
                     </article>
-                    <article class="tile is-child box is-white">
+                    <article class="tile is-child box is-white" @click="changeRoute('home')">
                         <h2 class="subtitle is-9">
                             Kućica označava
                             <span class="blue-text">POČETNU</span> stranicu.
@@ -31,7 +31,7 @@
                             <i class="fas fa-home fa-5x"></i>
                         </span>
                     </article>
-                    <article class="tile is-child box is-white">
+                    <article class="tile is-child box is-white" @click="changeRoute('profile')">
                         <h2 class="subtitle is-9">
                             Na vlastitom
                             <span class="blue-text">PROFILU</span> spremajte i dijelite pokuse.
@@ -41,7 +41,7 @@
                             <i class="fas fa-user fa-5x"></i>
                         </span>
                     </article>
-                    <article class="tile is-child box is-white">
+                    <article class="tile is-child box is-white" @click="changeRoute('experiment')">
                         <h2 class="subtitle is-9">
                             Izradite vlastite
                             <span class="blue-text">POKUSE</span> iz fizike u 3D okruženju.
@@ -54,7 +54,7 @@
                 </div>
             </div>
         </section>
-        <section class="hero is-dark is-small is-bold">
+        <section class="hero is-dark is-small is-bold" v-if="!isLoggedIn">
             <div class="hero-body">
                 <div class="control is-flex">
                     <p>
@@ -65,7 +65,7 @@
                     </p>
                     <div class="control margin-left">
                         <p>
-                            Već si izradio profil?
+                            Već imaš profil?
                             <router-link to="/login">
                                 <a>Prijavi se</a>
                             </router-link>
@@ -74,15 +74,38 @@
                 </div>
             </div>
         </section>
+        <section class="hero is-dark is-small is-bold" v-else>
+            <div class="hero-body">
+                <div class="control is-flex">
+                    <p>
+                        Prijavljeni ste kao
+                        <a @click="changeRoute('profile')">{{user.fullName}}</a>
+                    </p>
+                    <div class="control margin-left"></div>
+                </div>
+            </div>
+        </section>
     </div>
 </template>
 
 <script>
-import babylon from "@/helpers/babylon/babylon.js";
-import colors from "@/helpers/colors.js";
+import { mapGetters, mapState } from "vuex";
 
 export default {
-    name: "Home"
+    name: "Home",
+    computed: {
+        ...mapGetters({
+            isLoggedIn: "user/isLoggedIn"
+        }),
+        ...mapState({
+            user: state => state.user.user
+        })
+    },
+    methods: {
+        changeRoute(route) {
+            this.$router.push(route);
+        }
+    }
 };
 </script>
 
@@ -98,5 +121,11 @@ a {
 }
 a:hover {
     color: white;
+}
+.box:hover {
+    background-color: #e2e2e2;
+    box-shadow: 1px 1px 20px black;
+    z-index: 20;
+    cursor: pointer;
 }
 </style>

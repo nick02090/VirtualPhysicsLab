@@ -23,6 +23,25 @@ Vue.use(excel);
 
 Vue.component('apexchart', VueApexCharts);
 
+router.beforeEach(async (to, from, next) => {
+  if (store.state.user.user == null) {
+    await store.dispatch("user/retrieveUser")
+  }
+  if (to.meta.guestRequired === true) {
+    if (store.getters["user/isLoggedIn"]) {
+      next('/profile');
+      return;
+    }
+  }
+  if (to.meta.userRequired === true) {
+    if (!store.getters["user/isLoggedIn"]) {
+      next('/login');
+      return;
+    }
+  }
+  next();
+})
+
 new Vue({
   router,
   store,

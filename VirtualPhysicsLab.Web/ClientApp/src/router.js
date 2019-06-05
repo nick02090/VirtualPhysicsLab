@@ -27,17 +27,26 @@ export default new Router({
         {
             path: '/profile',
             component: Profile,
-            name: 'profile'
+            name: 'profile',
+            meta: {
+                userRequired: true
+            }
         },
         {
             path: '/login',
             component: Login,
-            name: 'login'
+            name: 'login',
+            meta: {
+                guestRequired: true
+            }
         },
         {
             path: '/register',
             component: Register,
-            name: 'register'
+            name: 'register',
+            meta: {
+                guestRequired: true
+            }
         },
         {
             path: '*',

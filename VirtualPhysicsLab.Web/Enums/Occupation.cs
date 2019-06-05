@@ -2,7 +2,7 @@
 {
     public enum Occupation
     {
-        professor,
-        student
+        professor = 0,
+        student = 1
     }
 }

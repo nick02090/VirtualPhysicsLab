@@ -10,11 +10,8 @@ namespace VirtualPhysicsLab.Data.Models
         [Key]
         [Required]
         public Guid Id { get; set; }
-        [Required]
         public string Name { get; set; }
-        [Required]
         public string LogicalName { get; set; }
-        [Required]
         public DateTime CreatedOn { get; set; }
 
         public override bool Equals(object obj)

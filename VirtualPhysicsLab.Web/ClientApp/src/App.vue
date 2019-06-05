@@ -7,6 +7,7 @@
 
 <script>
 import Navbar from "@/components/shared/Navbar.vue";
+import { mapActions } from "vuex";
 
 export default {
     name: "App",
@@ -14,7 +15,12 @@ export default {
         Navbar
     },
     async mounted() {
-        // await this.$store.dispatch("user/postUser");
+        await this.retrieveUser();
+    },
+    methods: {
+        ...mapActions({
+            retrieveUser: "user/retrieveUser"
+        })
     }
 };
 </script>

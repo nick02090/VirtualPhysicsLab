@@ -55,6 +55,7 @@ import UrediElement from "@/components/experiment/menus/UrediElement.vue";
 import RadnoOkruzenje from "@/components/experiment/menus/RadnoOkruzenje.vue";
 import FizikaElementa from "@/components/experiment/menus/FizikaElementa.vue";
 import Statistika from "@/components/experiment/menus/Statistika.vue";
+import MojPokus from "@/components/experiment/menus/MojPokus.vue";
 import { mapGetters, mapState } from "vuex";
 import babylon from "@/helpers/babylon/babylon.js";
 
@@ -104,6 +105,15 @@ export default {
                             component: Statistika
                         }
                     ]
+                },
+                {
+                    name: "Moje postavke",
+                    menus: [
+                        {
+                            name: "Moj pokus",
+                            component: MojPokus
+                        }
+                    ]
                 }
             ]
         };
@@ -113,7 +123,8 @@ export default {
         UrediElement,
         RadnoOkruzenje,
         FizikaElementa,
-        Statistika
+        Statistika,
+        MojPokus
     },
     mounted() {
         setInterval(() => {

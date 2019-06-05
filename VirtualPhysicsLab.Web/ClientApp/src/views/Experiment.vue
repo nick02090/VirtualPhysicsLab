@@ -286,7 +286,11 @@ export default {
             this.filteredExperiments = this.user.experiments.slice(start, end);
         },
         close() {
-            this.initScene();
+            if (this.group == 1) {
+                this.loadScene();
+            } else {
+                this.initScene();
+            }
             this.firstOpen = false;
         },
         unlockPlaying() {
@@ -298,6 +302,32 @@ export default {
         togglePlay(data) {
             this.$store.commit("experiment/SET_PLAYING", data);
             babylon.togglePlay(data);
+        },
+        loadScene() {
+            var canvas = document.getElementById("renderCanvas");
+            var engine = new BABYLON.Engine(canvas, true);
+
+            BABYLON.SceneLoader.Load(
+                "https://ufile.io/43ijolhz",
+                "",
+                engine,
+                function(newScene) {
+                    console.log("tu sam");
+                    // Wait for textures and shaders to be ready
+                    newScene.executeWhenReady(function() {
+                        // Attach camera to canvas inputs
+                        newScene.activeCamera.attachControl(canvas);
+
+                        // Once the scene is loaded, just register a render loop to render it
+                        engine.runRenderLoop(function() {
+                            newScene.render();
+                        });
+                    });
+                },
+                function(progress) {
+                    // To do: give progress feedback to user
+                }
+            );
         },
         initScene() {
             var canvas = document.getElementById("renderCanvas");

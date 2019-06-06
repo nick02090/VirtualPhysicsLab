@@ -79,7 +79,7 @@
                                 <span>Novi pokus</span>
                             </a>
                         </li>
-                        <li :class="{'is-active': group == 1}">
+                        <li :class="{'is-active': group == 1}" v-if="isLoggedIn">
                             <a @click="group = 1">
                                 <span class="icon is-small">
                                     <i class="fas fa-book" aria-hidden="true"></i>
@@ -199,56 +199,24 @@ export default {
             currentPage: 0,
             pages: 0,
             batchSize: 3,
-            filteredExperiments: [],
-            user: {
-                experiments: [
-                    {
-                        id: 1,
-                        title: "Pomak",
-                        date: new Date(2019, 5, 3),
-                        description:
-                            "Prikaz pomaka tijela u prostoru. Još nešto da nadopunim.",
-                        image:
-                            "https://bulma.io/images/placeholders/256x256.png"
-                    },
-                    {
-                        id: 2,
-                        title: "Pomak",
-                        date: new Date(2019, 4, 30),
-                        description: "Prikaz pomaka tijela u prostoru.",
-                        image:
-                            "https://bulma.io/images/placeholders/256x256.png"
-                    },
-                    {
-                        id: 3,
-                        title: "Pomak",
-                        date: new Date(2019, 4, 25),
-                        description: "Prikaz pomaka tijela u prostoru.",
-                        image:
-                            "https://bulma.io/images/placeholders/256x256.png"
-                    },
-                    {
-                        id: 4,
-                        title: "Pomak",
-                        date: new Date(2019, 4, 25),
-                        description: "Prikaz pomaka tijela u prostoru.",
-                        image:
-                            "https://bulma.io/images/placeholders/256x256.png"
-                    }
-                ]
-            }
+            filteredExperiments: []
         };
     },
     components: {
         Menu
     },
-    mounted() {
-        this.pages = Math.ceil(this.user.experiments.length / this.batchSize);
-        this.update();
+    async mounted() {
+        if (this.isLoggedIn) {
+            await this.getByUser(this.user.id);
+            this.pages = Math.ceil(this.experiments.length / this.batchSize);
+            this.update();
+        }
     },
     computed: {
         ...mapState({
-            isPlaying: state => state.experiment.playing
+            isPlaying: state => state.experiment.playing,
+            user: state => state.user.user,
+            experiments: state => state.experiment.experiments
         }),
         ...mapGetters({
             isLoggedIn: "user/isLoggedIn"
@@ -264,7 +232,8 @@ export default {
     },
     methods: {
         ...mapActions({
-            createWalls: "experiment/createWalls"
+            createWalls: "experiment/createWalls",
+            getByUser: "experiment/getByUser"
         }),
         previous() {
             if (this.currentPage > 0) {
@@ -283,7 +252,7 @@ export default {
         update() {
             var end = (this.currentPage + 1) * this.batchSize;
             var start = end - this.batchSize;
-            this.filteredExperiments = this.user.experiments.slice(start, end);
+            this.filteredExperiments = this.experiments.slice(start, end);
         },
         close() {
             this.initScene();

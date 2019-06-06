@@ -53,7 +53,8 @@ const types = {
     UPDATE_MESH_LOGS: "UPDATE_MESH_LOGS",
     DELETE_MESH_LOGS: "DELETE_MESH_LOGS",
 
-    SET_LOADING: "SET_LOADING"
+    SET_LOADING: "SET_LOADING",
+    SET_EXPERIMENTS: "SET_EXPERIMENTS"
 }
 
 const state = {
@@ -78,7 +79,8 @@ const state = {
 
     logs: [],
 
-    loading: false
+    loading: false,
+    experiments: []
 }
 
 const mutations = {
@@ -226,6 +228,9 @@ const mutations = {
 
     [types.SET_LOADING](state, data) {
         state.loading = data;
+    },
+    [types.SET_EXPERIMENTS](state, data) {
+        state.experiments = data;
     }
 }
 
@@ -415,6 +420,27 @@ const actions = {
                 }
 
                 resolve();
+            } catch (e) {
+                reject(e);
+            } finally {
+                commit(types.SET_LOADING, false);
+            }
+        })
+    },
+    getByUser({
+        state,
+        commit,
+        dispatch,
+        rootState
+    }, userId) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                commit(types.SET_LOADING, true);
+
+                let experiments = await experimentApi.getByUser(userId);
+                commit(types.SET_EXPERIMENTS, experiments);
+
+                resolve()
             } catch (e) {
                 reject(e);
             } finally {

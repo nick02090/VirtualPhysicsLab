@@ -50,6 +50,19 @@ namespace VirtualPhysicsLab.Web.Controllers
             return Ok(mesh);
         }
 
+        [HttpGet("user")]
+        public async Task<IActionResult> GetExperimentsByUser([FromQuery] Guid id)
+        {
+            var result = await ExperimentRepository.GetByUserAsync(id);
+
+            //foreach(var r in result)
+            //{
+            //    r.CreatedBy = null;
+            //}
+
+            return Ok(result);
+        }
+
         // PUT: api/Experiments/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutExperiment([FromRoute] Guid id, [FromBody] Experiment experiment)

@@ -20,5 +20,15 @@ export default {
         var response = await axios.post('/api/experiment/settings', settings);
 
         return response.data;
+    },
+    async getByUser(id) {
+
+        var response = await axios.get('/api/experiment/user', {
+            params: {
+                id: id
+            }
+        });
+
+        return response.data;
     }
 }

@@ -14,13 +14,13 @@
                 <article class="tile is-child notification" style="text-align: left;">
                     <p>
                         <b>Stručnost:</b>
-                        <span class="user-info">{{user.occupation}}</span>
+                        <span class="user-info">{{user.occupation | occupation}}</span>
                         <br>
                         <b>E-mail:</b>
                         <span class="user-info">{{user.email}}</span>
                         <br>
                         <b>Br. pokusa:</b>
-                        <span class="user-info">{{user.experiments.length}}</span>
+                        <span class="user-info">{{experiments.length}}</span>
                         <br>
                     </p>
                 </article>
@@ -37,12 +37,14 @@
                                         type="search"
                                         icon-pack="fas"
                                         icon="search"
+                                        v-model="searchQuery"
                                     ></b-input>
                                 </b-field>
                             </div>
                         </div>
 
                         <div class="flex-container" style="display: inline-block">
+                            <b-loading :is-full-page="false" :active="experimentsLoading"></b-loading>
                             <div
                                 class="box"
                                 style="width: 30rem;"
@@ -52,7 +54,7 @@
                                 <article class="media">
                                     <div class="media-left">
                                         <figure class="image is-64x64">
-                                            <img :src="experiment.image" alt="Image">
+                                            <img :src="experiment.image">
                                         </figure>
                                     </div>
                                     <div class="media-content">
@@ -61,21 +63,35 @@
                                                 <strong>{{experiment.title}}</strong>
                                                 <small
                                                     style="margin-left: 5px"
-                                                >{{experiment.date.toLocaleDateString("hr-HR")}}</small>
+                                                >{{new Date(experiment.createdOn).toLocaleDateString("hr-HR")}}</small>
                                                 <br>
                                                 <small>{{experiment.description}}</small>
                                             </p>
                                         </div>
                                         <nav class="level is-mobile">
                                             <div class="level-left">
-                                                <b-tooltip type="is-black" label="Pokreni">
-                                                    <span
-                                                        class="icon is-small"
-                                                        style="color: #284e7b;"
-                                                    >
-                                                        <i class="fas fa-link" aria-hidden="true"></i>
-                                                    </span>
-                                                </b-tooltip>
+                                                <span class="margin-5px">
+                                                    <b-tooltip type="is-black" label="Pokreni">
+                                                        <span
+                                                            class="icon is-small"
+                                                            style="color: #284e7b; cursor: pointer"
+                                                            @click="openExperiment(experiment.id)"
+                                                        >
+                                                            <i class="fas fa-link"></i>
+                                                        </span>
+                                                    </b-tooltip>
+                                                </span>
+                                                <span class="margin-5px">
+                                                    <b-tooltip type="is-black" label="Poveznica">
+                                                        <span
+                                                            class="icon is-small"
+                                                            style="color: #284e7b; cursor: pointer"
+                                                            @click="copyToClipboard(experiment.id)"
+                                                        >
+                                                            <i class="fas fa-copy"></i>
+                                                        </span>
+                                                    </b-tooltip>
+                                                </span>
                                             </div>
                                         </nav>
                                     </div>
@@ -117,7 +133,8 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from "vuex";
+import { mapState, mapGetters, mapActions } from "vuex";
+import Occupation from "@/helpers/mixins/Occupation.js";
 
 export default {
     name: "Profile",
@@ -126,75 +143,85 @@ export default {
             currentPage: 0,
             pages: 0,
             batchSize: 3,
-            filteredExperiments: [],
-            user: {
-                fullName: "Nikola Ćališ",
-                occupation: "student",
-                email: "nikola.calis9@gmail.com",
-                experiments: [
-                    {
-                        id: 1,
-                        title: "Pomak",
-                        date: new Date(2019, 5, 3),
-                        description:
-                            "Prikaz pomaka tijela u prostoru. Još nešto da nadopunim.",
-                        image:
-                            "https://bulma.io/images/placeholders/256x256.png"
-                    },
-                    {
-                        id: 2,
-                        title: "Pomak",
-                        date: new Date(2019, 4, 30),
-                        description: "Prikaz pomaka tijela u prostoru.",
-                        image:
-                            "https://bulma.io/images/placeholders/256x256.png"
-                    },
-                    {
-                        id: 3,
-                        title: "Pomak",
-                        date: new Date(2019, 4, 25),
-                        description: "Prikaz pomaka tijela u prostoru.",
-                        image:
-                            "https://bulma.io/images/placeholders/256x256.png"
-                    },
-                    {
-                        id: 4,
-                        title: "Pomak",
-                        date: new Date(2019, 4, 25),
-                        description: "Prikaz pomaka tijela u prostoru.",
-                        image:
-                            "https://bulma.io/images/placeholders/256x256.png"
-                    }
-                ]
-            }
+            searchQuery: ""
         };
     },
-    mounted() {
-        this.pages = Math.ceil(this.user.experiments.length / this.batchSize);
-        this.update();
+    mixins: [Occupation],
+    async mounted() {
+        await this.getByUser(this.user.id);
+        this.pages = Math.ceil(this.experiments.length / this.batchSize);
     },
     computed: {
+        ...mapState({
+            user: state => state.user.user,
+            experiments: state => state.experiment.experiments,
+            experimentsLoading: state => state.experiment.loading
+        }),
         ...mapGetters({
             isLoggedIn: "user/isLoggedIn"
-        })
+        }),
+        filteredExperiments() {
+            var experiments = [];
+            if (this.searchQuery && this.searchQuery.length == 0) {
+                experiments = this.experiments;
+            } else {
+                var regex = new RegExp(this.searchQuery, "i");
+
+                let preparedEntities = this.experiments.map(e => ({
+                    ...e,
+                    filterObject: {
+                        title: e.title,
+                        description: e.description,
+                        createdOn: new Date(e.createdOn).toLocaleString("hr-HR")
+                    }
+                }));
+                experiments = preparedEntities.filter(e =>
+                    Object.keys(e.filterObject).some(key =>
+                        regex.test(e.filterObject[key])
+                    )
+                );
+            }
+            var end = (this.currentPage + 1) * this.batchSize;
+            var start = end - this.batchSize;
+            return experiments.slice(start, end);
+        }
     },
     methods: {
+        ...mapActions({
+            getByUser: "experiment/getByUser"
+        }),
+        openExperiment(id) {
+            this.$router.push(`/experiment?id=${id}`);
+        },
+        copyToClipboard(id) {
+            let url = `${window.location.protocol}//${
+                window.location.hostname
+            }:${window.location.port}/experiment?id=${id}`;
+            this.copy(url);
+            this.$toast.open({
+                duration: 2500,
+                message: "Poveznica spremljena u međuspremnik.",
+                position: "is-bottom",
+                type: "is-success"
+            });
+        },
+        copy(text) {
+            var dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+        },
         previous() {
             if (this.currentPage > 0) {
                 this.currentPage--;
-                this.update();
             }
         },
         next() {
             if (this.currentPage < this.pages - 1) {
                 this.currentPage++;
-                this.update();
             }
-        },
-        update() {
-            var end = (this.currentPage + 1) * this.batchSize;
-            var start = end - this.batchSize;
-            this.filteredExperiments = this.user.experiments.slice(start, end);
         }
     }
 };

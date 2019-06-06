@@ -55,5 +55,11 @@ export default {
         });
 
         return response.data;
+    },
+    async organizationData() {
+
+        var response = await axios.get('/api/user/organization-data');
+
+        return response.data;
     }
 }

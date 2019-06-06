@@ -64,6 +64,7 @@
                             type="search"
                             icon-pack="fas"
                             icon="search"
+                            v-model="searchQuery"
                         ></b-input>
                     </b-field>
                 </div>
@@ -134,6 +135,9 @@
                                 <div class="content">
                                     <p>
                                         <strong>{{experiment.title}}</strong>
+                                        <small
+                                            style="margin-left: 5px"
+                                        >{{new Date(experiment.createdOn).toLocaleDateString("hr-HR")}}</small>
                                         <br>
                                         <small>{{experiment.description}}</small>
                                     </p>
@@ -175,6 +179,7 @@
                     class="button is-success margin-left"
                     icon-left="check"
                     @click="close"
+                    :disabled="lockCreate"
                 >Pokreni</b-button>
             </footer>
         </b-modal>
@@ -199,7 +204,9 @@ export default {
             currentPage: 0,
             pages: 0,
             batchSize: 3,
-            filteredExperiments: []
+            engine: null,
+            searchQuery: "",
+            lockCreate: false
         };
     },
     components: {
@@ -209,7 +216,6 @@ export default {
         if (this.isLoggedIn) {
             await this.getByUser(this.user.id);
             this.pages = Math.ceil(this.experiments.length / this.batchSize);
-            this.update();
         }
     },
     computed: {
@@ -228,6 +234,38 @@ export default {
             set: function(data) {
                 this.$store.commit("experiment/SET_SCENE", data);
             }
+        },
+        filteredExperiments() {
+            var experiments = [];
+            if (this.searchQuery && this.searchQuery.length == 0) {
+                experiments = this.experiments;
+            } else {
+                var regex = new RegExp(this.searchQuery, "i");
+
+                let preparedEntities = this.experiments.map(e => ({
+                    ...e,
+                    filterObject: {
+                        title: e.title,
+                        description: e.description,
+                        createdOn: new Date(e.createdOn).toLocaleString("hr-HR")
+                    }
+                }));
+                experiments = preparedEntities.filter(e =>
+                    Object.keys(e.filterObject).some(key =>
+                        regex.test(e.filterObject[key])
+                    )
+                );
+            }
+            this.selected1 = 0;
+            var end = (this.currentPage + 1) * this.batchSize;
+            var start = end - this.batchSize;
+            var result = experiments.slice(start, end);
+            if (result.length == 0) {
+                this.lockCreate = true;
+            } else {
+                this.lockCreate = false;
+            }
+            return result;
         }
     },
     methods: {
@@ -239,20 +277,13 @@ export default {
             if (this.currentPage > 0) {
                 this.selected1 = 0;
                 this.currentPage--;
-                this.update();
             }
         },
         next() {
             if (this.currentPage < this.pages - 1) {
                 this.selected1 = 0;
                 this.currentPage++;
-                this.update();
             }
-        },
-        update() {
-            var end = (this.currentPage + 1) * this.batchSize;
-            var start = end - this.batchSize;
-            this.filteredExperiments = this.experiments.slice(start, end);
         },
         close() {
             this.initScene();
@@ -272,22 +303,25 @@ export default {
             babylon.togglePlay(data);
         },
         loadScene() {
+            this.engine.displayLoadingUI();
+            this.engine.loadingUIText = "START...";
             console.log("učitavanje...");
+            this.engine.hideLoadingUI();
         },
         initScene() {
             var canvas = document.getElementById("renderCanvas");
-            var engine = new BABYLON.Engine(canvas, true);
+            this.engine = new BABYLON.Engine(canvas, true);
 
-            var scene = babylon.createEmptyScene(canvas, engine);
+            var scene = babylon.createEmptyScene(canvas, this.engine);
             var color = colors.hexToColor3("#f5f1f2");
             scene.clearColor = new BABYLON.Color3(color[0], color[1], color[2]);
 
-            engine.runRenderLoop(function() {
+            this.engine.runRenderLoop(function() {
                 scene.render();
             });
 
             window.addEventListener("resize", function() {
-                engine.resize();
+                this.engine.resize();
             });
 
             this.scene = scene;

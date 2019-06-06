@@ -4,6 +4,9 @@ import * as globalTypes from '../mutation-types'
 const getters = {
     isLoggedIn(state) {
         return state.token == null ? false : true;
+    },
+    organizationUrl(state) {
+        return state.organizationData.organizationUrl;
     }
 }
 
@@ -11,13 +14,15 @@ const getters = {
 const types = {
     SET_LOADING: "SET_LOADING",
     SET_USER: "SET_USER",
-    SET_TOKEN: "SET_TOKEN"
+    SET_TOKEN: "SET_TOKEN",
+    SET_ORGANIZATION_DATA: "SET_ORGANIZATION_DATA"
 }
 
 // state
 const state = {
     loading: false,
     user: null,
+    organizationData: null,
     token: localStorage.getItem('token') || null
 }
 
@@ -30,6 +35,9 @@ const mutations = {
     },
     [types.SET_TOKEN](state, data) {
         state.token = data;
+    },
+    [types.SET_ORGANIZATION_DATA](state, data) {
+        state.organizationData = data;
     }
 }
 
@@ -149,6 +157,23 @@ const actions = {
                 localStorage.removeItem('token');
                 commit(types.SET_TOKEN, null);
                 commit(types.SET_LOADING, false);
+            }
+        })
+    },
+    async retrieveOrganizationData({
+        state,
+        commit,
+        dispatch,
+        rootState
+    }) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let organizationData = await userApi.organizationData();
+                commit(types.SET_ORGANIZATION_DATA, organizationData)
+
+            } catch (e) {
+                reject(e);
             }
         })
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using VirtualPhysicsLab.Data.Models;
 using VirtualPhysicsLab.Web.Helpers;
@@ -17,11 +18,13 @@ namespace VirtualPhysicsLab.Web.Controllers
         private readonly PasswordHasher _passwordHasher;
         public IUserService UserService { get; }
         public IUserRepository UserRepository { get; }
+        public IConnectionSettings ConnectionSettings { get; }
 
-        public UsersController(IUserService userService, IUserRepository userRepository)
+        public UsersController(IUserService userService, IUserRepository userRepository, IConnectionSettings connectionSettings)
         {
             UserService = userService;
             UserRepository = userRepository;
+            ConnectionSettings = connectionSettings;
             _passwordHasher = new PasswordHasher();
         }
 
@@ -118,6 +121,18 @@ namespace VirtualPhysicsLab.Web.Controllers
             await UserService.Logout(token);
 
             return Ok();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("organization-data"), ProducesResponseType(StatusCodes.Status200OK)]
+        public JsonResult GetOrganizationData()
+        {
+            var result = new
+            {
+                ConnectionSettings.OrganizationUrl
+            };
+
+            return new JsonResult(result);
         }
 
         // POST: api/Users

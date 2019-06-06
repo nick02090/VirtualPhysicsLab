@@ -77,10 +77,16 @@ namespace VirtualPhysicsLab.Web
 
             #region Repositories
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IMeshRepository, MeshRepository>();
+            services.AddScoped<IExperimentRepository, ExperimentRepository>();
+            services.AddScoped<IExperimentSettingsRepository, ExperimentSettingsRepository>();
+            services.AddScoped<IMeshSettingsRepository, MeshSettingsRepository>();
             #endregion
 
             #region Services
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IMeshService, MeshService>();
+            services.AddScoped<IExperimentService, ExperimentService>();
             #endregion
 
             services.AddHttpsRedirection(options =>

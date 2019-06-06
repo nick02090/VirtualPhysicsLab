@@ -11,7 +11,6 @@ namespace VirtualPhysicsLab.Data.Models
         public string FullName => $"{FirstName} {LastName}";
         [Required]
         public string Email { get; set; }
-        [Required]
         public string Password { get; set; }
         public Occupation Occupation { get; set; }
         public string Token { get; set; }

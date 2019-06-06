@@ -35,7 +35,8 @@ export default {
     },
     computed: {
         ...mapState({
-            isLoading: state => state.user.loading
+            isLoading: state => state.experiment.loading,
+            user: state => state.user.user
         }),
         scene: {
             get: function() {
@@ -47,6 +48,9 @@ export default {
         }
     },
     methods: {
+        ...mapActions({
+            createExperiment: "experiment/createExperiment"
+        }),
         async validate() {
             let validationOK = await this.$validator.validateAll();
             return this.errors.any() == false && validationOK;
@@ -55,34 +59,17 @@ export default {
             let isValid = await this.validate();
             if (!isValid) return;
 
-            this.doDownload(this.title, this.scene);
+            let createdBy = this.user;
 
-            this.notification("Yaaay!");
-        },
-        doDownload(filename, scene) {
-            if (this.objectUrl) {
-                window.URL.revokeObjectURL(this.objectUrl);
-            }
+            var info = {
+                title: this.title,
+                description: this.description,
+                createdBy: createdBy
+            };
+            await this.createExperiment(info);
 
-            var serializedScene = BABYLON.SceneSerializer.Serialize(scene);
-
-            var strScene = JSON.stringify(serializedScene);
-
-            filename += ".babylon";
-
-            var blob = new Blob([strScene], { type: "octet/stream" });
-
-            // turn blob into an object URL; saved as a member, so can be cleaned out later
-            this.objectUrl = (window.webkitURL || window.URL).createObjectURL(
-                blob
-            );
-
-            var link = window.document.createElement("a");
-            link.href = this.objectUrl;
-            link.download = filename;
-            var click = document.createEvent("MouseEvents");
-            click.initEvent("click", true, false);
-            link.dispatchEvent(click);
+            this.notification("Uspješno ste kreirali novi pokus!");
+            this.changeMenu(null, null);
         },
         notification(msg) {
             this.$emit("notification", msg);

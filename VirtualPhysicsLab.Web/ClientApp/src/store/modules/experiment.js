@@ -1,3 +1,5 @@
+import experimentApi from "@/api/experiment.js"
+import meshApi from "@/api/mesh.js"
 import * as globalTypes from '../mutation-types'
 
 const getters = {
@@ -49,7 +51,9 @@ const types = {
     UPDATE_LOGS: "UPDATE_LOGS",
     SET_MESH_LOGS: "SET_MESH_LOGS",
     UPDATE_MESH_LOGS: "UPDATE_MESH_LOGS",
-    DELETE_MESH_LOGS: "DELETE_MESH_LOGS"
+    DELETE_MESH_LOGS: "DELETE_MESH_LOGS",
+
+    SET_LOADING: "SET_LOADING"
 }
 
 const state = {
@@ -72,7 +76,9 @@ const state = {
 
     physics: [],
 
-    logs: []
+    logs: [],
+
+    loading: false
 }
 
 const mutations = {
@@ -216,6 +222,10 @@ const mutations = {
     },
     [types.DELETE_MESH_LOGS](state, data) {
         state.logs = state.logs.filter(x => x.name !== data);
+    },
+
+    [types.SET_LOADING](state, data) {
+        state.loading = data;
     }
 }
 
@@ -311,6 +321,106 @@ const actions = {
         }
 
         commit(types.SET_WALLS, [])
+    },
+    createExperiment({
+        state,
+        commit,
+        dispatch,
+        rootState
+    }, experimentInfo) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                commit(types.SET_LOADING, true);
+
+                var experiment = {
+                    title: experimentInfo.title,
+                    description: experimentInfo.description,
+                    createdById: experimentInfo.createdBy.id,
+                    createdBy: experimentInfo.createdBy
+                }
+
+                var experimentId = await experimentApi.createExperiment(experiment);
+
+                var settings = {
+                    friction: state.ground.physicsImpostor.friction,
+                    restitution: state.ground.physicsImpostor.restitution,
+                    walls: state.walls.length > 0,
+                    axis: state.axis.length > 0,
+                    experimentId: experimentId
+                }
+
+                await experimentApi.createSettings(settings);
+
+                var meshes = state.meshes;
+
+                for (var i in meshes) {
+                    var name = meshes[i];
+                    var obj = state.scene.getMeshByName(name);
+                    var type = obj.physicsImpostor.type;
+                    var mesh = {
+                        name: name,
+                        experiment: {
+                            id: experimentId
+                        },
+                        type: type
+                    }
+
+                    var meshId = await meshApi.createMesh(mesh);
+
+                    var size = obj.getBoundingInfo().boundingBox.extendSize;
+                    var position = obj.position;
+                    var rotation = obj.rotationQuaternion.toEulerAngles();
+                    var mass = obj.physicsImpostor.mass;
+                    var friction = obj.physicsImpostor.friction;
+                    var restitution = obj.physicsImpostor.restitution;
+                    var pi = Math.PI;
+                    var color = obj.material.diffuseColor;
+                    var axis = false;
+                    if (state.meshAxis.length > 0) {
+                        var found = state.meshAxis.find(x => x.mesh === name);
+                        if (found) {
+                            axis = true;
+                        }
+                    }
+
+                    var settings = {
+                        axis: axis,
+                        mass: mass,
+                        friction: friction,
+                        restitution: restitution,
+                        size: {
+                            x: size.x * 2,
+                            y: size.y * 2,
+                            z: size.z * 2
+                        },
+                        position: {
+                            x: position.x,
+                            y: position.y,
+                            z: position.z
+                        },
+                        rotation: {
+                            x: rotation.x * (180 / pi),
+                            y: rotation.y * (180 / pi),
+                            z: rotation.z * (180 / pi)
+                        },
+                        color: {
+                            x: color.r,
+                            y: color.g,
+                            z: color.b
+                        },
+                        meshId: meshId
+                    }
+
+                    await meshApi.createSettings(settings);
+                }
+
+                resolve();
+            } catch (e) {
+                reject(e);
+            } finally {
+                commit(types.SET_LOADING, false);
+            }
+        })
     }
 }
 

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtualPhysicsLab.Web.Data;
 
 namespace VirtualPhysicsLab.Web.Migrations
 {
     [DbContext(typeof(VPLContext))]
-    partial class VPLContextModelSnapshot : ModelSnapshot
+    [Migration("20190606024051_ExperimentRefactored")]
+    partial class ExperimentRefactored
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,7 +68,7 @@ namespace VirtualPhysicsLab.Web.Migrations
 
                     b.Property<DateTime>("CreatedOn");
 
-                    b.Property<Guid?>("ExperimentId");
+                    b.Property<Guid>("ExperimentId");
 
                     b.Property<string>("LogicalName");
 
@@ -91,6 +93,8 @@ namespace VirtualPhysicsLab.Web.Migrations
                     b.Property<DateTime>("CreatedOn");
 
                     b.Property<float>("Friction");
+
+                    b.Property<string>("HexColor");
 
                     b.Property<string>("LogicalName");
 
@@ -130,7 +134,8 @@ namespace VirtualPhysicsLab.Web.Migrations
 
                     b.Property<int>("Occupation");
 
-                    b.Property<string>("Password");
+                    b.Property<string>("Password")
+                        .IsRequired();
 
                     b.Property<string>("Token");
 
@@ -202,7 +207,8 @@ namespace VirtualPhysicsLab.Web.Migrations
                 {
                     b.HasOne("VirtualPhysicsLab.Data.Models.Experiment", "Experiment")
                         .WithMany("Meshes")
-                        .HasForeignKey("ExperimentId");
+                        .HasForeignKey("ExperimentId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VirtualPhysicsLab.Data.Models.MeshSettings", b =>

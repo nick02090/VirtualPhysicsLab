@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VirtualPhysicsLab.Data.Models;
+using VirtualPhysicsLab.Web.Models;
 
 namespace VirtualPhysicsLab.Web.Data
 {
@@ -9,9 +10,9 @@ namespace VirtualPhysicsLab.Web.Data
         public DbSet<Group> Groups { get; set; }
         public DbSet<UserGroup> UserGroups { get; set; }
         public DbSet<Experiment> Experiments { get; set; }
+        public DbSet<ExperimentSettings> ExperimentSettings { get; set; }
         public DbSet<Mesh> Meshes { get; set; }
         public DbSet<MeshSettings> MeshSettings { get; set; }
-        public DbSet<MeshSize> MeshSizes { get; set; }
 
         public VPLContext(DbContextOptions<VPLContext> options) : base(options)
         {
@@ -20,6 +21,9 @@ namespace VirtualPhysicsLab.Web.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<User>().HasMany(u => u.Experiments).WithOne(e => e.CreatedBy);
+            modelBuilder.Entity<Experiment>().HasMany(e => e.Meshes).WithOne(m => m.Experiment);
 
             #region MANY-MANY
 
@@ -45,6 +49,13 @@ namespace VirtualPhysicsLab.Web.Data
                 .HasOne(m => m.Settings)
                 .WithOne(s => s.Mesh)
                 .HasForeignKey<MeshSettings>(s => s.MeshId);
+            #endregion
+
+            #region Experiment-ExperimentSettings
+            modelBuilder.Entity<Experiment>()
+                .HasOne(e => e.Settings)
+                .WithOne(s => s.Experiment)
+                .HasForeignKey<ExperimentSettings>(s => s.ExperimentId);
             #endregion
 
             #endregion

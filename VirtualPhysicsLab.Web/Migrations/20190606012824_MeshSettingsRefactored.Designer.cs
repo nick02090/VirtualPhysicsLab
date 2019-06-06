@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtualPhysicsLab.Web.Data;
 
 namespace VirtualPhysicsLab.Web.Migrations
 {
     [DbContext(typeof(VPLContext))]
-    partial class VPLContextModelSnapshot : ModelSnapshot
+    [Migration("20190606012824_MeshSettingsRefactored")]
+    partial class MeshSettingsRefactored
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,17 +26,13 @@ namespace VirtualPhysicsLab.Web.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<Guid?>("CreatedById");
+                    b.Property<Guid>("CreatedById");
 
                     b.Property<DateTime>("CreatedOn");
-
-                    b.Property<string>("Description");
 
                     b.Property<string>("LogicalName");
 
                     b.Property<string>("Name");
-
-                    b.Property<string>("Title");
 
                     b.HasKey("Id");
 
@@ -66,7 +64,7 @@ namespace VirtualPhysicsLab.Web.Migrations
 
                     b.Property<DateTime>("CreatedOn");
 
-                    b.Property<Guid?>("ExperimentId");
+                    b.Property<Guid>("ExperimentId");
 
                     b.Property<string>("LogicalName");
 
@@ -86,11 +84,11 @@ namespace VirtualPhysicsLab.Web.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<bool>("Axis");
-
                     b.Property<DateTime>("CreatedOn");
 
                     b.Property<float>("Friction");
+
+                    b.Property<string>("HexColor");
 
                     b.Property<string>("LogicalName");
 
@@ -130,7 +128,8 @@ namespace VirtualPhysicsLab.Web.Migrations
 
                     b.Property<int>("Occupation");
 
-                    b.Property<string>("Password");
+                    b.Property<string>("Password")
+                        .IsRequired();
 
                     b.Property<string>("Token");
 
@@ -162,47 +161,20 @@ namespace VirtualPhysicsLab.Web.Migrations
                     b.ToTable("UserGroups");
                 });
 
-            modelBuilder.Entity("VirtualPhysicsLab.Web.Models.ExperimentSettings", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<bool>("Axis");
-
-                    b.Property<DateTime>("CreatedOn");
-
-                    b.Property<Guid>("ExperimentId");
-
-                    b.Property<float>("Friction");
-
-                    b.Property<string>("LogicalName");
-
-                    b.Property<string>("Name");
-
-                    b.Property<float>("Restitution");
-
-                    b.Property<bool>("Walls");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExperimentId")
-                        .IsUnique();
-
-                    b.ToTable("ExperimentSettings");
-                });
-
             modelBuilder.Entity("VirtualPhysicsLab.Data.Models.Experiment", b =>
                 {
                     b.HasOne("VirtualPhysicsLab.Data.Models.User", "CreatedBy")
                         .WithMany("Experiments")
-                        .HasForeignKey("CreatedById");
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VirtualPhysicsLab.Data.Models.Mesh", b =>
                 {
                     b.HasOne("VirtualPhysicsLab.Data.Models.Experiment", "Experiment")
                         .WithMany("Meshes")
-                        .HasForeignKey("ExperimentId");
+                        .HasForeignKey("ExperimentId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VirtualPhysicsLab.Data.Models.MeshSettings", b =>
@@ -223,14 +195,6 @@ namespace VirtualPhysicsLab.Web.Migrations
                     b.HasOne("VirtualPhysicsLab.Data.Models.User", "User")
                         .WithMany("Groups")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("VirtualPhysicsLab.Web.Models.ExperimentSettings", b =>
-                {
-                    b.HasOne("VirtualPhysicsLab.Data.Models.Experiment", "Experiment")
-                        .WithOne("Settings")
-                        .HasForeignKey("VirtualPhysicsLab.Web.Models.ExperimentSettings", "ExperimentId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618

@@ -2,9 +2,7 @@
 {
     public enum MeshType
     {
-        Box, 
-        Sphere, 
-        Plane,
-        Ground
+        Box = 2, 
+        Sphere = 1
     }
 }

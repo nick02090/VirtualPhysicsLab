@@ -15,7 +15,7 @@ Vue.use(Buefy, {
   defaultIconPack: 'fa'
 });
 
-Vue.use(Babylon);
+// Vue.use(Babylon);
 
 Vue.use(VeeValidate);
 

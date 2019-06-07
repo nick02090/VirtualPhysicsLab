@@ -42,12 +42,34 @@ namespace VirtualPhysicsLab.Web.Repositories
 
         public async Task<Experiment> GetAsync(Guid id)
         {
-            return await VPLContext.Experiments.FindAsync(id);
+            return await VPLContext.Experiments
+                .Include(x => x.Settings)
+                .Select(x => new Experiment
+                {
+                    Settings = x.Settings,
+                    CreatedOn = x.CreatedOn,
+                    Description = x.Description,
+                    Id = x.Id,
+                    LogicalName = x.LogicalName,
+                    Name = x.Name,
+                    Title = x.Title
+                }).SingleOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<IEnumerable<Experiment>> GetByUserAsync(Guid id)
         {
-            return await VPLContext.Experiments.Where(x => x.CreatedBy.Id == id).ToArrayAsync();
+            return await VPLContext.Experiments.Where(x => x.CreatedBy.Id == id)
+                .Include(x => x.Settings)
+                .Select(x => new Experiment
+                {
+                    Settings = x.Settings,
+                    CreatedOn = x.CreatedOn,
+                    Description = x.Description,
+                    Id = x.Id,
+                    LogicalName = x.LogicalName,
+                    Name = x.Name,
+                    Title = x.Title
+                }).ToArrayAsync();
         }
 
         public async Task<Experiment> UpdateAsync(Experiment entity)

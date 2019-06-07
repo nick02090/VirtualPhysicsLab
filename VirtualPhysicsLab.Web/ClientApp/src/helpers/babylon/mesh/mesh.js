@@ -23,7 +23,9 @@ export default {
                 name: properties.name,
                 mass: properties.mass,
                 type: newMesh.physicsImpostor.type,
-                velocity: newMesh.physicsImpostor.getLinearVelocity()
+                velocity: newMesh.physicsImpostor.getLinearVelocity(),
+                friction: newMesh.physicsImpostor.friction,
+                restitution: newMesh.physicsImpostor.restitution
             };
             store.commit("experiment/UPDATE_MESH_IMPOSTORS", physicsImpostor);
             newMesh.physicsImpostor.dispose();
@@ -97,7 +99,10 @@ export default {
             if (playing === true) {
                 var physicsImpostor = {
                     mass: mesh.physicsImpostor.mass,
-                    type: mesh.physicsImpostor.type
+                    type: mesh.physicsImpostor.type,
+                    velocity: mesh.physicsImpostor.getLinearVelocity(),
+                    friction: mesh.physicsImpostor.friction,
+                    restitution: mesh.physicsImpostor.restitution
                 };
                 store.commit("experiment/SET_PHYSICS_IMPOSTOR", physicsImpostor);
                 mesh.physicsImpostor.dispose();
@@ -131,9 +136,12 @@ export default {
                     mesh,
                     physicsImpostor.type, {
                         mass: physicsImpostor.mass,
+                        friction: physicsImpostor.friction,
+                        restitution: physicsImpostor.restitution
                     },
                     scene
                 );
+                mesh.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(parseFloat(physicsImpostor.velocity.x), parseFloat(physicsImpostor.velocity.y), parseFloat(physicsImpostor.velocity.z)));
                 store.commit("experiment/SET_PHYSICS_IMPOSTOR", null);
             }
             store.dispatch("experiment/createWalls");

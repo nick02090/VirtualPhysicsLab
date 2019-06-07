@@ -27,6 +27,7 @@
             </div>
             <div class="tile is-parent is-vertical">
                 <article class="tile is-child notification">
+                    <b-loading :is-full-page="false" :active="experimentsLoading"></b-loading>
                     <div class="content">
                         <div class="control is-flex">
                             <p class="title is-4" style="text-align: left">Moji pokusi</p>
@@ -44,7 +45,6 @@
                         </div>
 
                         <div class="flex-container" style="display: inline-block">
-                            <b-loading :is-full-page="false" :active="experimentsLoading"></b-loading>
                             <div
                                 class="box"
                                 style="width: 30rem;"

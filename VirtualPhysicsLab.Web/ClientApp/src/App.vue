@@ -13,14 +13,6 @@ export default {
     name: "App",
     components: {
         Navbar
-    },
-    async mounted() {
-        await this.retrieveUser();
-    },
-    methods: {
-        ...mapActions({
-            retrieveUser: "user/retrieveUser"
-        })
     }
 };
 </script>

@@ -54,7 +54,9 @@ const types = {
     DELETE_MESH_LOGS: "DELETE_MESH_LOGS",
 
     SET_LOADING: "SET_LOADING",
-    SET_EXPERIMENTS: "SET_EXPERIMENTS"
+    SET_EXPERIMENTS: "SET_EXPERIMENTS",
+    SET_EXPERIMENT_MESHES: "SET_EXPERIMENT_MESHES",
+    SET_EXPERIMENT: "SET_EXPERIMENT"
 }
 
 const state = {
@@ -80,7 +82,9 @@ const state = {
     logs: [],
 
     loading: false,
-    experiments: []
+    experiments: [],
+    experimentMeshes: [],
+    experiment: null
 }
 
 const mutations = {
@@ -231,6 +235,12 @@ const mutations = {
     },
     [types.SET_EXPERIMENTS](state, data) {
         state.experiments = data;
+    },
+    [types.SET_EXPERIMENT_MESHES](state, data) {
+        state.experimentMeshes = data;
+    },
+    [types.SET_EXPERIMENT](state, data) {
+        state.experiment = data;
     }
 }
 
@@ -409,9 +419,9 @@ const actions = {
                             z: rotation.z * (180 / pi)
                         },
                         color: {
-                            x: color.r,
-                            y: color.g,
-                            z: color.b
+                            r: color.r,
+                            g: color.g,
+                            b: color.b
                         },
                         meshId: meshId
                     }
@@ -445,6 +455,48 @@ const actions = {
                 reject(e);
             } finally {
                 commit(types.SET_LOADING, false);
+            }
+        })
+    },
+    getExperiment({
+        state,
+        commit,
+        dispatch,
+        rootState
+    }, id) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                commit(types.SET_LOADING, true);
+
+                let experiment = await experimentApi.getById(id);
+                commit(types.SET_EXPERIMENT, experiment);
+
+                resolve()
+            } catch (e) {
+                reject(e);
+            } finally {
+                commit(types.SET_LOADING, false)
+            }
+        })
+    },
+    getMeshes({
+        state,
+        commit,
+        dispatch,
+        rootState
+    }, id) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                commit(types.SET_LOADING, true);
+
+                let meshes = await meshApi.getByExperiment(id);
+                commit(types.SET_EXPERIMENT_MESHES, meshes);
+
+                resolve()
+            } catch (e) {
+                reject(e);
+            } finally {
+                commit(types.SET_LOADING, false)
             }
         })
     }

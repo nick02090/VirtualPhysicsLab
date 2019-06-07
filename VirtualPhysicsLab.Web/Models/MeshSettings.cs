@@ -5,10 +5,10 @@ namespace VirtualPhysicsLab.Data.Models
 {
     public class MeshSettings : BaseModel
     {
-        public Vector3<float> Color { get; set; }
-        public Vector3<float> Size { get; set; }
-        public Vector3<float> Position { get; set; }
-        public Vector3<float> Rotation { get; set; }
+        public Color Color { get; set; }
+        public Size Size { get; set; }
+        public Position Position { get; set; }
+        public Rotation Rotation { get; set; }
         public float Mass { get; set; }
         public float Friction { get; set; }
         public float Restitution { get; set; }

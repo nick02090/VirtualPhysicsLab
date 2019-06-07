@@ -13,6 +13,10 @@ namespace VirtualPhysicsLab.Web.Data
         public DbSet<ExperimentSettings> ExperimentSettings { get; set; }
         public DbSet<Mesh> Meshes { get; set; }
         public DbSet<MeshSettings> MeshSettings { get; set; }
+        public DbSet<Position> Positions { get; set; }
+        public DbSet<Rotation> Rotations { get; set; }
+        public DbSet<Size> Sizes { get; set; }
+        public DbSet<Color> Colors { get; set; }
 
         public VPLContext(DbContextOptions<VPLContext> options) : base(options)
         {
@@ -43,6 +47,28 @@ namespace VirtualPhysicsLab.Web.Data
             #endregion
 
             #region ONE-ONE
+
+            #region MeshSettings-Vector3
+            modelBuilder.Entity<MeshSettings>()
+                .HasOne(m => m.Color)
+                .WithOne(c => c.MeshSettings)
+                .HasForeignKey<Color>(c => c.MeshSettingsId);
+
+            modelBuilder.Entity<MeshSettings>()
+                .HasOne(m => m.Position)
+                .WithOne(p => p.MeshSettings)
+                .HasForeignKey<Position>(p => p.MeshSettingsId);
+
+            modelBuilder.Entity<MeshSettings>()
+                .HasOne(m => m.Rotation)
+                .WithOne(r => r.MeshSettings)
+                .HasForeignKey<Rotation>(r => r.MeshSettingsId);
+
+            modelBuilder.Entity<MeshSettings>()
+                 .HasOne(m => m.Size)
+                 .WithOne(s => s.MeshSettings)
+                 .HasForeignKey<Size>(s => s.MeshSettingsId);
+            #endregion
 
             #region Mesh-MeshSettings
             modelBuilder.Entity<Mesh>()

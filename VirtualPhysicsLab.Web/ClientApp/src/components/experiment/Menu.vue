@@ -105,15 +105,6 @@ export default {
                             component: Statistika
                         }
                     ]
-                },
-                {
-                    name: "Moje postavke",
-                    menus: [
-                        {
-                            name: "Moj pokus",
-                            component: MojPokus
-                        }
-                    ]
                 }
             ]
         };
@@ -127,6 +118,17 @@ export default {
         MojPokus
     },
     mounted() {
+        if (this.isLoggedIn) {
+            this.menus.push({
+                name: "Postavke",
+                menus: [
+                    {
+                        name: "Moj pokus",
+                        component: MojPokus
+                    }
+                ]
+            });
+        }
         setInterval(() => {
             this.updateLogs();
         }, 1);
@@ -139,7 +141,8 @@ export default {
         ...mapGetters({
             getMeshByName: "experiment/getMeshByName",
             getMeshLog: "experiment/getMeshLog",
-            getMeshPhysic: "experiment/getMeshPhysic"
+            getMeshPhysic: "experiment/getMeshPhysic",
+            isLoggedIn: "user/isLoggedIn"
         })
     },
     methods: {

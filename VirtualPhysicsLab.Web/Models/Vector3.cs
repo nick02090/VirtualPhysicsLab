@@ -1,4 +1,5 @@
-﻿using VirtualPhysicsLab.Data.Models;
+﻿using System;
+using VirtualPhysicsLab.Data.Models;
 
 namespace VirtualPhysicsLab.Web.Models
 {

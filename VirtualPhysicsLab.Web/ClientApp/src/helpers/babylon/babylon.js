@@ -43,7 +43,9 @@ export default {
                     name: existingMeshes[i],
                     mass: mesh.physicsImpostor.mass,
                     type: mesh.physicsImpostor.type,
-                    velocity: mesh.physicsImpostor.getLinearVelocity()
+                    velocity: mesh.physicsImpostor.getLinearVelocity(),
+                    friction: mesh.physicsImpostor.friction,
+                    restitution: mesh.physicsImpostor.restitution
                 };
                 physicsImpostors.push(physicsImpostor);
                 mesh.physicsImpostor.dispose();
@@ -59,6 +61,8 @@ export default {
                         obj,
                         physicsImpostors[i].type, {
                             mass: physicsImpostors[i].mass,
+                            friction: physicsImpostors[i].friction,
+                            restitution: physicsImpostors[i].restitution
                         },
                         scene
                     );
@@ -159,6 +163,57 @@ export default {
         };
         var axis = [x, y, z];
         return axis;
+    },
+    loadScene(scene, meshes, experiment) {
+        for (var i in meshes) {
+            var mesh = meshes[i];
+            var type = "";
+            switch (mesh.type) {
+                case 2:
+                    type = "BOX";
+                    break;
+                case 1:
+                    type = "SPHERE";
+                    break;
+                default:
+                    break;
+            }
+            var properties = {
+                name: mesh.name,
+                mass: mesh.settings.mass,
+                friction: mesh.settings.friction,
+                restitution: mesh.settings.restitution
+            }
+            var material = new BABYLON.StandardMaterial("material", scene);
+            material.diffuseColor = new BABYLON.Color3(
+                mesh.settings.color.r,
+                mesh.settings.color.g,
+                mesh.settings.color.b
+            );
+            var obj = this.addMesh(type, properties, material, scene);
+            obj.position.x = mesh.settings.position.x;
+            obj.position.y = mesh.settings.position.y;
+            obj.position.z = mesh.settings.position.z;
+            if (mesh.settings.axis == true) {
+                this.showMeshAxis(mesh.name)
+            }
+
+            var pi = Math.PI;
+            var x = mesh.settings.rotation.x * (pi / 180);
+            var y = mesh.settings.rotation.y * (pi / 180);
+            var z = mesh.settings.rotation.z * (pi / 180);
+            var rotation = {
+                x: x,
+                y: y,
+                z: z
+            };
+            var quaternion = new BABYLON.Quaternion.RotationYawPitchRoll(
+                rotation.y,
+                rotation.x,
+                rotation.z
+            );
+            obj.rotationQuaternion = quaternion;
+        }
     },
     createEmptyScene(canvas, engine) {
         var scene = new BABYLON.Scene(engine);

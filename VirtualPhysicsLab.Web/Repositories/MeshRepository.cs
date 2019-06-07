@@ -45,6 +45,35 @@ namespace VirtualPhysicsLab.Web.Repositories
             return await VPLContext.Meshes.FindAsync(id);
         }
 
+        public async Task<IEnumerable<Mesh>> GetByExperimentAsync(Guid id)
+        {
+            return await VPLContext.Meshes.Where(x => x.Experiment.Id == id)
+                .Include(x => x.Settings)
+                .Select(x => new Mesh
+                {
+                    CreatedOn = x.CreatedOn,
+                    Id = x.Id,
+                    LogicalName = x.LogicalName,
+                    Name = x.Name,
+                    Settings = new MeshSettings
+                    {
+                        Position = x.Settings.Position,
+                        Color = x.Settings.Color,
+                        Name = x.Settings.Name,
+                        Axis = x.Settings.Axis,
+                        CreatedOn = x.Settings.CreatedOn,
+                        Friction = x.Settings.Friction,
+                        Id = x.Settings.Id,
+                        LogicalName = x.Settings.LogicalName,
+                        Mass = x.Settings.Mass,
+                        Restitution = x.Settings.Restitution,
+                        Rotation = x.Settings.Rotation,
+                        Size = x.Settings.Size
+                    },
+                    Type = x.Type
+                }).ToArrayAsync();
+        }
+
         public async Task<Mesh> UpdateAsync(Mesh entity)
         {
             VPLContext.Entry(entity).State = EntityState.Modified;

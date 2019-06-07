@@ -40,25 +40,20 @@ namespace VirtualPhysicsLab.Web.Controllers
                 return BadRequest(ModelState);
             }
 
-            var mesh = await ExperimentRepository.GetAsync(id);
+            var experiment = await ExperimentRepository.GetAsync(id);
 
-            if (mesh == null)
+            if (experiment == null)
             {
                 return NotFound();
             }
 
-            return Ok(mesh);
+            return Ok(experiment);
         }
 
         [HttpGet("user")]
         public async Task<IActionResult> GetExperimentsByUser([FromQuery] Guid id)
         {
             var result = await ExperimentRepository.GetByUserAsync(id);
-
-            //foreach(var r in result)
-            //{
-            //    r.CreatedBy = null;
-            //}
 
             return Ok(result);
         }

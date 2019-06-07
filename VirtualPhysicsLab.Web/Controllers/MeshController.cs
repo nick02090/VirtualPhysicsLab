@@ -50,6 +50,14 @@ namespace VirtualPhysicsLab.Web.Controllers
             return Ok(mesh);
         }
 
+        [HttpGet("experiment")]
+        public async Task<IActionResult> GetMeshesByExperiment([FromQuery] Guid id)
+        {
+            var result = await MeshRepository.GetByExperimentAsync(id);
+
+            return Ok(result);
+        }
+
         // PUT: api/Meshes/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMesh([FromQuery] Guid id, [FromBody] Mesh mesh)

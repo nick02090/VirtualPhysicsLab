@@ -1,6 +1,7 @@
 <template>
     <div id="experiment">
         <div class="tile is-ancestor">
+            <b-loading :is-full-page="false" :active="sceneLoading"></b-loading>
             <div class="tile is-parent is-3 has-text-left">
                 <article class="tile is-child box">
                     <Menu
@@ -20,6 +21,7 @@
             </div>
         </div>
         <div class="tile is-ancestor">
+            <b-loading :is-full-page="false" :active="sceneLoading"></b-loading>
             <div class="tile is-parent is-3">
                 <article class="tile is-child box">
                     <b-tooltip
@@ -32,7 +34,7 @@
                             class="is-success"
                             size="is-small"
                             icon-left="pause"
-                            :disabled="isDisabled"
+                            :disabled="isDisabled || sceneLoading"
                             @click="togglePlay(false)"
                         >Fizika uključena</b-button>
                     </b-tooltip>
@@ -46,7 +48,7 @@
                             class="is-dark"
                             size="is-small"
                             icon-left="play"
-                            :disabled="isDisabled"
+                            :disabled="isDisabled || sceneLoading"
                             @click="togglePlay(true)"
                         >Fizika isključena</b-button>
                     </b-tooltip>
@@ -70,17 +72,21 @@
                 </div>
             </header>
             <section class="modal-card-body">
+                <b-loading :is-full-page="false" :active="experimentsLoading"></b-loading>
                 <nav class="breadcrumb is-centered has-bullet-separator" aria-label="breadcrumbs">
                     <ul>
                         <li :class="{'is-active': group == 0}">
-                            <a @click="group = 0">
+                            <a @click="group = 0; lockCreate = false">
                                 <span class="icon is-small">
                                     <i class="fas fa-rocket" aria-hidden="true"></i>
                                 </span>
                                 <span>Novi pokus</span>
                             </a>
                         </li>
-                        <li :class="{'is-active': group == 1}" v-if="isLoggedIn">
+                        <li
+                            :class="{'is-active': group == 1}"
+                            v-if="isLoggedIn && experiments.length > 0"
+                        >
                             <a @click="group = 1">
                                 <span class="icon is-small">
                                     <i class="fas fa-book" aria-hidden="true"></i>
@@ -206,13 +212,26 @@ export default {
             batchSize: 3,
             engine: null,
             searchQuery: "",
-            lockCreate: false
+            lockCreate: false,
+            sceneLoading: false
         };
     },
     components: {
         Menu
     },
     async mounted() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get("id");
+        if (id) {
+            this.firstOpen = false;
+            this.initScene();
+            this.sceneLoading = true;
+            this.engine.displayLoadingUI();
+            this.engine.loadingUIText = "Dohvaćanje pokusa...";
+            await this.getExperiment(id);
+            await this.loadScene(this.experiment);
+            return;
+        }
         if (this.isLoggedIn) {
             await this.getByUser(this.user.id);
             this.pages = Math.ceil(this.experiments.length / this.batchSize);
@@ -222,7 +241,10 @@ export default {
         ...mapState({
             isPlaying: state => state.experiment.playing,
             user: state => state.user.user,
-            experiments: state => state.experiment.experiments
+            experiments: state => state.experiment.experiments,
+            meshes: state => state.experiment.experimentMeshes,
+            experimentsLoading: state => state.experiment.loading,
+            experiment: state => state.experiment.experiment
         }),
         ...mapGetters({
             isLoggedIn: "user/isLoggedIn"
@@ -260,7 +282,7 @@ export default {
             var end = (this.currentPage + 1) * this.batchSize;
             var start = end - this.batchSize;
             var result = experiments.slice(start, end);
-            if (result.length == 0) {
+            if (result.length == 0 && this.group == 1) {
                 this.lockCreate = true;
             } else {
                 this.lockCreate = false;
@@ -271,7 +293,9 @@ export default {
     methods: {
         ...mapActions({
             createWalls: "experiment/createWalls",
-            getByUser: "experiment/getByUser"
+            getByUser: "experiment/getByUser",
+            getMeshes: "experiment/getMeshes",
+            getExperiment: "experiment/getExperiment"
         }),
         previous() {
             if (this.currentPage > 0) {
@@ -288,7 +312,15 @@ export default {
         close() {
             this.initScene();
             if (this.group == 1) {
-                this.loadScene();
+                var experiment = this.filteredExperiments[this.selected1];
+                var newurl =
+                    window.location.protocol +
+                    "//" +
+                    window.location.host +
+                    window.location.pathname +
+                    `?id=${experiment.id}`;
+                window.history.pushState({ path: newurl }, "", newurl);
+                this.loadScene(experiment);
             }
             this.firstOpen = false;
         },
@@ -302,11 +334,15 @@ export default {
             this.$store.commit("experiment/SET_PLAYING", data);
             babylon.togglePlay(data);
         },
-        loadScene() {
+        async loadScene(experiment) {
+            this.sceneLoading = true;
             this.engine.displayLoadingUI();
-            this.engine.loadingUIText = "START...";
-            console.log("učitavanje...");
+            this.engine.loadingUIText = "Dohvaćanje podataka...";
+            await this.getMeshes(experiment.id);
+            this.engine.loadingUIText = "Postavljanje elemenata na scenu...";
+            babylon.loadScene(this.scene, this.meshes, experiment);
             this.engine.hideLoadingUI();
+            this.sceneLoading = false;
         },
         initScene() {
             var canvas = document.getElementById("renderCanvas");

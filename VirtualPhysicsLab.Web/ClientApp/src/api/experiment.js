@@ -30,5 +30,11 @@ export default {
         });
 
         return response.data;
+    },
+    async getById(id) {
+
+        var response = await axios.get(`/api/experiment/${id}`)
+
+        return response.data;
     }
 }

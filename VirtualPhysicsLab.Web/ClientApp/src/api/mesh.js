@@ -19,5 +19,15 @@ export default {
         var response = await axios.post('/api/mesh/settings', settings);
 
         return response.data;
+    },
+    async getByExperiment(id) {
+
+        var response = await axios.get('/api/mesh/experiment', {
+            params: {
+                id: id
+            }
+        });
+
+        return response.data;
     }
 }

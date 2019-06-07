@@ -56,7 +56,7 @@
             </div>
         </div>
 
-        <b-modal :active.sync="firstOpen" @close="close" width="700px">
+        <b-modal :active.sync="firstOpen" @close="close" width="700px" scroll="keep">
             <header class="modal-card-head is-flex" style="text-align: left">
                 <p class="modal-card-title">Odabir pokusa</p>
                 <div class="control margin-left" v-if="group == 1">

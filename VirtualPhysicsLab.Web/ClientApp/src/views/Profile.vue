@@ -77,7 +77,7 @@
                                                             style="color: #284e7b; cursor: pointer"
                                                             @click="openExperiment(experiment.id)"
                                                         >
-                                                            <i class="fas fa-link"></i>
+                                                            <i class="fas fa-external-link-alt"></i>
                                                         </span>
                                                     </b-tooltip>
                                                 </span>
@@ -89,6 +89,17 @@
                                                             @click="copyToClipboard(experiment.id)"
                                                         >
                                                             <i class="fas fa-copy"></i>
+                                                        </span>
+                                                    </b-tooltip>
+                                                </span>
+                                                <span class="margin-5px">
+                                                    <b-tooltip type="is-black" label="Izbriši">
+                                                        <span
+                                                            class="icon is-small"
+                                                            style="color: #ff3860; cursor: pointer"
+                                                            @click="deleteExperiment(experiment.id, experiment.name)"
+                                                        >
+                                                            <i class="fas fa-trash-alt"></i>
                                                         </span>
                                                     </b-tooltip>
                                                 </span>
@@ -105,7 +116,7 @@
                                 >
                                     <a
                                         class="pagination-previous my-pagination-button"
-                                        :class="{'disabled': currentPage == 0}"
+                                        :class="{'disabled': currentPage == 0 || experimentsLoading}"
                                         @click="previous"
                                     >
                                         <span class="icon">
@@ -114,7 +125,7 @@
                                     </a>
                                     <a
                                         class="pagination-next my-pagination-button"
-                                        :class="{'disabled': currentPage == pages - 1}"
+                                        :class="{'disabled': currentPage == pages - 1 || experimentsLoading}"
                                         @click="next"
                                     >
                                         Sljedeća
@@ -188,8 +199,30 @@ export default {
     },
     methods: {
         ...mapActions({
-            getByUser: "experiment/getByUser"
+            getByUser: "experiment/getByUser",
+            deleteExperimentAsync: "experiment/deleteExperiment"
         }),
+        deleteExperiment(id, name) {
+            this.$dialog.confirm({
+                message: `Jeste li sigurni da želite izbrisati pokus ${name}?`,
+                onConfirm: async () => {
+                    await this.deleteExperimentAsync(id);
+                    this.$toast.open({
+                        duration: 2500,
+                        message: "Pokus uspješno izbrisan.",
+                        position: "is-bottom",
+                        type: "is-success"
+                    });
+                    await this.getByUser(this.user.id);
+                    this.pages = Math.ceil(
+                        this.experiments.length / this.batchSize
+                    );
+                },
+                cancelText: "Odustani",
+                confirmText: "Izbriši",
+                type: "is-success"
+            });
+        },
         openExperiment(id) {
             this.$router.push(`/experiment?id=${id}`);
         },

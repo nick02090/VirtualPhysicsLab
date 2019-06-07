@@ -36,5 +36,34 @@ export default {
         var response = await axios.get(`/api/experiment/${id}`)
 
         return response.data;
+    },
+    async updateExperiment(experiment) {
+
+        var response = await axios.put(`/api/experiment/${experiment.id}`, experiment)
+
+        return response.data;
+    },
+    async updateSettings(settings) {
+
+        var response = await axios.put(`/api/experiment/settings`, settings);
+
+        return response.data;
+    },
+    async checkAvailability(data) {
+
+        var response = await axios.post('/api/experiment/check-availability', {
+            params: {
+                title: data.title,
+                userId: data.userId
+            }
+        });
+
+        return response.data;
+    },
+    async deleteExperiment(experimentId) {
+
+        var response = await axios.delete(`/api/experiment/${experimentId}`);
+
+        return response.data;
     }
 }

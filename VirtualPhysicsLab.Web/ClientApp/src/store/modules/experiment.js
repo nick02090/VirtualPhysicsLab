@@ -355,6 +355,13 @@ const actions = {
                 }
 
                 var experimentId = await experimentApi.createExperiment(experiment);
+                let newExperiment = {
+                    id: experimentId,
+                    title: experimentInfo.title,
+                    description: experimentInfo.description,
+                    createdBy: experimentInfo.createdBy
+                }
+                commit(types.SET_EXPERIMENT, newExperiment);
 
                 var settings = {
                     friction: state.ground.physicsImpostor.friction,
@@ -437,6 +444,149 @@ const actions = {
             }
         })
     },
+    updateExperiment({
+        state,
+        commit,
+        dispatch,
+        rootState
+    }, experimentInfo) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                commit(types.SET_LOADING, true);
+
+                var experiment = {
+                    title: experimentInfo.title,
+                    description: experimentInfo.description,
+                    createdBy: experimentInfo.createdBy,
+                    id: experimentInfo.id
+                }
+
+                await experimentApi.updateExperiment(experiment);
+                let newExperiment = {
+                    id: experimentInfo.id,
+                    title: experimentInfo.title,
+                    description: experimentInfo.description,
+                    createdBy: experimentInfo.createdBy
+                }
+                commit(types.SET_EXPERIMENT, newExperiment);
+
+                var settings = {
+                    friction: state.ground.physicsImpostor.friction,
+                    restitution: state.ground.physicsImpostor.restitution,
+                    walls: state.walls.length > 0,
+                    axis: state.axis.length > 0,
+                    experimentId: experimentInfo.id
+                }
+
+                await experimentApi.updateSettings(settings);
+
+                var meshes = state.meshes;
+
+                for (var i in meshes) {
+                    var name = meshes[i];
+                    var obj = state.scene.getMeshByName(name);
+                    var type = obj.physicsImpostor.type;
+                    var mesh = {
+                        name: name,
+                        experiment: {
+                            id: experimentInfo.id
+                        },
+                        type: type
+                    }
+
+                    var meshId = null;
+                    var update = false;
+
+                    var existingMesh = state.experimentMeshes.find(x => x.name === mesh.name);
+                    if (existingMesh) {
+                        var newMesh = {
+                            name: name,
+                            experiment: {
+                                id: experimentInfo.id
+                            },
+                            type: type,
+                            id: existingMesh.id
+                        }
+                        await meshApi.updateMesh(newMesh);
+                        meshId = newMesh.id;
+                        update = true;
+                    } else {
+                        meshId = await meshApi.createMesh(mesh);
+                        update = false;
+                    }
+
+                    var size = obj.getBoundingInfo().boundingBox.extendSize;
+                    var position = obj.position;
+                    var rotation = obj.rotationQuaternion.toEulerAngles();
+                    var mass = obj.physicsImpostor.mass;
+                    var friction = obj.physicsImpostor.friction;
+                    var restitution = obj.physicsImpostor.restitution;
+                    var pi = Math.PI;
+                    var color = obj.material.diffuseColor;
+                    var axis = false;
+                    if (state.meshAxis.length > 0) {
+                        var found = state.meshAxis.find(x => x.mesh === name);
+                        if (found) {
+                            axis = true;
+                        }
+                    }
+
+                    var settings = {
+                        axis: axis,
+                        mass: mass,
+                        friction: friction,
+                        restitution: restitution,
+                        size: {
+                            x: size.x * 2,
+                            y: size.y * 2,
+                            z: size.z * 2
+                        },
+                        position: {
+                            x: position.x,
+                            y: position.y,
+                            z: position.z
+                        },
+                        rotation: {
+                            x: rotation.x * (180 / pi),
+                            y: rotation.y * (180 / pi),
+                            z: rotation.z * (180 / pi)
+                        },
+                        color: {
+                            r: color.r,
+                            g: color.g,
+                            b: color.b
+                        },
+                        meshId: meshId
+                    }
+
+                    if (update) {
+                        var newSettings = {
+                            ...settings,
+                            id: existingMesh.settings.id
+                        }
+                        await meshApi.updateSettings(newSettings);
+                    } else {
+                        await meshApi.createSettings(settings);
+                    }
+                }
+
+                var previousMeshes = state.experimentMeshes;
+                for (var i in previousMeshes) {
+                    var previousMesh = previousMeshes[i];
+                    var deleteFlag = meshes.find(x => x === previousMesh.name);
+                    if (deleteFlag === undefined) {
+                        await meshApi.deleteMesh(previousMesh.id);
+                    }
+                }
+
+                resolve();
+            } catch (e) {
+                reject(e);
+            } finally {
+                commit(types.SET_LOADING, false);
+            }
+        })
+    },
     getByUser({
         state,
         commit,
@@ -497,6 +647,46 @@ const actions = {
                 reject(e);
             } finally {
                 commit(types.SET_LOADING, false)
+            }
+        })
+    },
+    checkAvailability({
+        state,
+        commit,
+        dispatch,
+        rootState
+    }, data) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                commit(types.SET_LOADING, true);
+
+                var isAvailable = await experimentApi.checkAvailability(data);
+
+                resolve(isAvailable);
+            } catch (e) {
+                reject(e);
+            } finally {
+                commit(types.SET_LOADING, false);
+            }
+        })
+    },
+    deleteExperiment({
+        state,
+        commit,
+        dispatch,
+        rootState
+    }, id) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                commit(types.SET_LOADING, true);
+
+                await experimentApi.deleteExperiment(id);
+
+                resolve();
+            } catch (e) {
+                reject(e);
+            } finally {
+                commit(types.SET_LOADING, false);
             }
         })
     }

@@ -26,8 +26,8 @@ namespace VirtualPhysicsLab.Web.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<User>().HasMany(u => u.Experiments).WithOne(e => e.CreatedBy);
-            modelBuilder.Entity<Experiment>().HasMany(e => e.Meshes).WithOne(m => m.Experiment);
+            modelBuilder.Entity<User>().HasMany(u => u.Experiments).WithOne(e => e.CreatedBy).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Experiment>().HasMany(e => e.Meshes).WithOne(m => m.Experiment).OnDelete(DeleteBehavior.Cascade);
 
             #region MANY-MANY
 

@@ -9,5 +9,7 @@ namespace VirtualPhysicsLab.Web.Interfaces
     public interface IExperimentRepository : IBaseRepository<Experiment>
     {
         Task<IEnumerable<Experiment>> GetByUserAsync(Guid id);
+        Task<Experiment> GetByUserAndTitleAsync(string title, Guid userId);
+        Task<Experiment> GetByIdAsync(Guid id);
     }
 }

@@ -45,6 +45,11 @@ namespace VirtualPhysicsLab.Web.Repositories
             return await VPLContext.ExperimentSettings.FindAsync(id);
         }
 
+        public async Task<ExperimentSettings> GetByExperimentAsync(Guid experimentId)
+        {
+            return await VPLContext.ExperimentSettings.Include(x => x.Experiment).Where(x => x.ExperimentId == experimentId).SingleOrDefaultAsync();
+        }
+
         public async Task<ExperimentSettings> UpdateAsync(ExperimentSettings entity)
         {
             VPLContext.Entry(entity).State = EntityState.Modified;

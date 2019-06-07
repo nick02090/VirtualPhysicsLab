@@ -214,6 +214,15 @@ export default {
             );
             obj.rotationQuaternion = quaternion;
         }
+
+        if (experiment.settings.axis === false) {
+            this.removeAxis();
+        }
+        if (experiment.settings.walls === false) {
+            store.dispatch("experiment/deleteWalls");
+        }
+        store.state.experiment.ground.physicsImpostor.friction = experiment.settings.friction;
+        store.state.experiment.ground.physicsImpostor.restitution = experiment.settings.restitution;
     },
     createEmptyScene(canvas, engine) {
         var scene = new BABYLON.Scene(engine);

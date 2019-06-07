@@ -77,6 +77,27 @@ namespace VirtualPhysicsLab.Web.Controllers
             return NoContent();
         }
 
+        [HttpPut("settings")]
+        public async Task<IActionResult> PutExperimentSettings([FromBody] ExperimentSettings experimentSettings)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await ExperimentService.UpdateSettingsAsync(experimentSettings);
+
+            return NoContent();
+        }
+
+        [HttpPost("check-availability")]
+        public async Task<IActionResult> CheckAvailability([FromQuery] string title, [FromQuery] Guid userId)
+        {
+            var result = await ExperimentService.CheckAvailability(title, userId);
+
+            return Ok(result);
+        }
+
         // POST: api/Experiments
         [HttpPost]
         public async Task<IActionResult> PostExperiment([FromBody] Experiment experiment)
@@ -101,7 +122,7 @@ namespace VirtualPhysicsLab.Web.Controllers
         {
             experimentSettings.LogicalName = "experiment_settings";
             experimentSettings.CreatedOn = DateTime.Now;
-            experimentSettings.Experiment = await ExperimentRepository.GetAsync(experimentSettings.ExperimentId);
+            experimentSettings.Experiment = await ExperimentRepository.GetByIdAsync(experimentSettings.ExperimentId);
 
             if (!ModelState.IsValid)
             {

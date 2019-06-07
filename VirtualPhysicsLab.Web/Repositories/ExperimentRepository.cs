@@ -56,12 +56,26 @@ namespace VirtualPhysicsLab.Web.Repositories
                 }).SingleOrDefaultAsync(x => x.Id == id);
         }
 
+        public async Task<Experiment> GetByIdAsync(Guid id)
+        {
+            return await VPLContext.Experiments.FindAsync(id);
+        }
+
+        public async Task<Experiment> GetByUserAndTitleAsync(string title, Guid userId)
+        {
+            return await VPLContext.Experiments.Where(x => x.CreatedBy.Id == userId && x.Title == title).SingleOrDefaultAsync();
+        }
+
         public async Task<IEnumerable<Experiment>> GetByUserAsync(Guid id)
         {
             return await VPLContext.Experiments.Where(x => x.CreatedBy.Id == id)
                 .Include(x => x.Settings)
                 .Select(x => new Experiment
                 {
+                    CreatedBy = new User
+                    {
+                        Id = x.CreatedBy.Id
+                    },
                     Settings = x.Settings,
                     CreatedOn = x.CreatedOn,
                     Description = x.Description,
@@ -74,7 +88,17 @@ namespace VirtualPhysicsLab.Web.Repositories
 
         public async Task<Experiment> UpdateAsync(Experiment entity)
         {
-            VPLContext.Entry(entity).State = EntityState.Modified;
+            var experiment = await VPLContext.Experiments
+                .Include(x => x.Meshes)
+                .Include(x => x.Settings)
+                .Include(x => x.CreatedBy)
+                .Where(x => x.Id == entity.Id).SingleOrDefaultAsync();
+
+            experiment.Description = entity.Description;
+            experiment.Title = entity.Title;
+            experiment.Name = entity.Title;
+
+            VPLContext.Entry(experiment).State = EntityState.Modified;
 
             try
             {
@@ -82,7 +106,7 @@ namespace VirtualPhysicsLab.Web.Repositories
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ExperimentExists(entity.Id))
+                if (!ExperimentExists(experiment.Id))
                 {
                     return null;
                 }
@@ -92,7 +116,7 @@ namespace VirtualPhysicsLab.Web.Repositories
                 }
             }
 
-            return entity;
+            return experiment;
         }
         private bool ExperimentExists(Guid id)
         {

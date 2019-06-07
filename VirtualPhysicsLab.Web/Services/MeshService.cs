@@ -17,5 +17,21 @@ namespace VirtualPhysicsLab.Web.Services
 
             return meshSettings;
         }
+        public async Task<MeshSettings> UpdateSettingsAsync(MeshSettings entity)
+        {
+            var newMeshSettings = await MeshSettingsRepository.GetByMeshAsync(entity.MeshId);
+            newMeshSettings.Axis = entity.Axis;
+            newMeshSettings.Friction = entity.Friction;
+            newMeshSettings.Restitution = entity.Restitution;
+            newMeshSettings.Color = entity.Color;
+            newMeshSettings.Mass = entity.Mass;
+            newMeshSettings.Position = entity.Position;
+            newMeshSettings.Rotation = entity.Rotation;
+            newMeshSettings.Size = entity.Size;
+
+            var experimentSettings = await MeshSettingsRepository.UpdateAsync(newMeshSettings);
+
+            return experimentSettings;
+        }
     }
 }

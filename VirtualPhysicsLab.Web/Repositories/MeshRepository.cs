@@ -76,7 +76,13 @@ namespace VirtualPhysicsLab.Web.Repositories
 
         public async Task<Mesh> UpdateAsync(Mesh entity)
         {
-            VPLContext.Entry(entity).State = EntityState.Modified;
+            var mesh = await VPLContext.Meshes
+                .Include(x => x.Settings)
+                .Where(x => x.Id == entity.Id).SingleOrDefaultAsync();
+
+            mesh.Type = entity.Type;
+
+            VPLContext.Entry(mesh).State = EntityState.Modified;
 
             try
             {
@@ -84,7 +90,7 @@ namespace VirtualPhysicsLab.Web.Repositories
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!MeshExists(entity.Id))
+                if (!MeshExists(mesh.Id))
                 {
                     return null;
                 }
@@ -94,7 +100,7 @@ namespace VirtualPhysicsLab.Web.Repositories
                 }
             }
 
-            return entity;
+            return mesh;
         }
 
         private bool MeshExists(Guid id)

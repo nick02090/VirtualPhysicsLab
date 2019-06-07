@@ -45,6 +45,17 @@ namespace VirtualPhysicsLab.Web.Repositories
             return await VPLContext.MeshSettings.FindAsync(id);
         }
 
+        public async Task<MeshSettings> GetByMeshAsync(Guid meshId)
+        {
+            return await VPLContext.MeshSettings
+                .Include(x => x.Mesh)
+                .Include(x => x.Color)
+                .Include(x => x.Position)
+                .Include(x => x.Rotation)
+                .Include(x => x.Size)
+                .Where(x => x.MeshId == meshId).SingleOrDefaultAsync();
+        }
+
         public async Task<MeshSettings> UpdateAsync(MeshSettings entity)
         {
             VPLContext.Entry(entity).State = EntityState.Modified;

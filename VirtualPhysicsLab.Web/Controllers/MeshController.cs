@@ -60,7 +60,7 @@ namespace VirtualPhysicsLab.Web.Controllers
 
         // PUT: api/Meshes/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMesh([FromQuery] Guid id, [FromBody] Mesh mesh)
+        public async Task<IActionResult> PutMesh([FromRoute] Guid id, [FromBody] Mesh mesh)
         {
             if (!ModelState.IsValid)
             {
@@ -77,13 +77,26 @@ namespace VirtualPhysicsLab.Web.Controllers
             return NoContent();
         }
 
+        [HttpPut("settings")]
+        public async Task<IActionResult> PutMeshSettings([FromBody] MeshSettings meshSettings)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await MeshService.UpdateSettingsAsync(meshSettings);
+
+            return NoContent();
+        }
+
         // POST: api/Meshes
         [HttpPost]
         public async Task<IActionResult> PostMesh([FromBody] Mesh mesh)
         {
             mesh.LogicalName = "mesh";
             mesh.CreatedOn = DateTime.Now;
-            mesh.Experiment = await ExperimentRepository.GetAsync(mesh.Experiment.Id);
+            mesh.Experiment = await ExperimentRepository.GetByIdAsync(mesh.Experiment.Id);
 
             if (!ModelState.IsValid)
             {
@@ -114,7 +127,7 @@ namespace VirtualPhysicsLab.Web.Controllers
 
         // DELETE: api/Meshes/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMesh([FromQuery] Guid id)
+        public async Task<IActionResult> DeleteMesh([FromRoute] Guid id)
         {
             if (!ModelState.IsValid)
             {

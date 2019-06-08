@@ -19,6 +19,12 @@ const getters = {
             if (meshLog === undefined) return [];
             return meshLog.log;
         }
+    },
+    getExperiments(state, getters, rootState, rootGetters) {
+        if (rootState.user.user) {
+            return state.homeExperiments.filter(x => x.createdBy.id != rootState.user.user.id);
+        }
+        return state.homeExperiments;
     }
 }
 
@@ -56,7 +62,8 @@ const types = {
     SET_LOADING: "SET_LOADING",
     SET_EXPERIMENTS: "SET_EXPERIMENTS",
     SET_EXPERIMENT_MESHES: "SET_EXPERIMENT_MESHES",
-    SET_EXPERIMENT: "SET_EXPERIMENT"
+    SET_EXPERIMENT: "SET_EXPERIMENT",
+    SET_HOME_EXPERIMENTS: "SET_HOME_EXPERIMENTS"
 }
 
 const state = {
@@ -84,7 +91,8 @@ const state = {
     loading: false,
     experiments: [],
     experimentMeshes: [],
-    experiment: null
+    experiment: null,
+    homeExperiments: []
 }
 
 const mutations = {
@@ -241,6 +249,9 @@ const mutations = {
     },
     [types.SET_EXPERIMENT](state, data) {
         state.experiment = data;
+    },
+    [types.SET_HOME_EXPERIMENTS](state, data) {
+        state.homeExperiments = data;
     }
 }
 
@@ -685,6 +696,27 @@ const actions = {
                 resolve();
             } catch (e) {
                 reject(e);
+            } finally {
+                commit(types.SET_LOADING, false);
+            }
+        })
+    },
+    getExperimentsAsync({
+        state,
+        commit,
+        dispatch,
+        rootState
+    }) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                commit(types.SET_LOADING, true)
+
+                var homeExperiments = await experimentApi.getExperiments();
+                commit(types.SET_HOME_EXPERIMENTS, homeExperiments);
+
+                resolve();
+            } catch (e) {
+                reject(e)
             } finally {
                 commit(types.SET_LOADING, false);
             }

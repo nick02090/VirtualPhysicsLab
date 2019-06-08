@@ -65,5 +65,11 @@ export default {
         var response = await axios.delete(`/api/experiment/${experimentId}`);
 
         return response.data;
+    },
+    async getExperiments() {
+
+        var repsonse = await axios.get('/api/experiment');
+
+        return repsonse.data;
     }
 }

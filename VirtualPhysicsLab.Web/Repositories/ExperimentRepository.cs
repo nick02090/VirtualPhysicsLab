@@ -37,7 +37,22 @@ namespace VirtualPhysicsLab.Web.Repositories
 
         public async Task<IEnumerable<Experiment>> GetAsync()
         {
-            return await VPLContext.Experiments.Include(x => x.CreatedBy).ToArrayAsync();
+            return await VPLContext.Experiments
+                .Select(x => new Experiment
+                {
+                    CreatedBy = new User
+                    {
+                        Id = x.CreatedBy.Id,
+                        FirstName = x.CreatedBy.FirstName,
+                        LastName = x.CreatedBy.LastName
+                    },
+                    Id = x.Id,
+                    CreatedOn = x.CreatedOn,
+                    Description = x.Description,
+                    LogicalName = x.LogicalName,
+                    Name = x.Name,
+                    Title = x.Title
+                }).ToArrayAsync();
         }
 
         public async Task<Experiment> GetAsync(Guid id)

@@ -67,5 +67,11 @@ export default {
         var response = await axios.get(`/api/user/${id}`);
 
         return response.data;
+    },
+    async getUsers() {
+
+        var response = await axios.get('/api/user');
+
+        return response.data;
     }
 }

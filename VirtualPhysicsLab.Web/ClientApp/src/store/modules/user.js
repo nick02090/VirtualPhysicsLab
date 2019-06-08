@@ -7,6 +7,12 @@ const getters = {
     },
     organizationUrl(state) {
         return state.organizationData.organizationUrl;
+    },
+    getUsers(state) {
+        if (state.user) {
+            return state.users.filter(x => x.id != state.user.id);
+        }
+        return state.users;
     }
 }
 
@@ -16,7 +22,8 @@ const types = {
     SET_USER: "SET_USER",
     SET_TOKEN: "SET_TOKEN",
     SET_ORGANIZATION_DATA: "SET_ORGANIZATION_DATA",
-    SET_PROFILE: "SET_PROFILE"
+    SET_PROFILE: "SET_PROFILE",
+    SET_USERS: "SET_USERS"
 }
 
 // state
@@ -25,7 +32,8 @@ const state = {
     user: null,
     organizationData: null,
     token: localStorage.getItem('token') || null,
-    profile: null
+    profile: null,
+    users: []
 }
 
 const mutations = {
@@ -43,6 +51,9 @@ const mutations = {
     },
     [types.SET_PROFILE](state, data) {
         state.profile = data;
+    },
+    [types.SET_USERS](state, data) {
+        state.users = data;
     }
 }
 
@@ -198,8 +209,30 @@ const actions = {
                 let organizationData = await userApi.organizationData();
                 commit(types.SET_ORGANIZATION_DATA, organizationData)
 
+
             } catch (e) {
                 reject(e);
+            }
+        })
+    },
+    async getUsersAsync({
+        state,
+        commit,
+        dispatch,
+        rootState
+    }) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                commit(types.SET_LOADING, true);
+
+                let users = await userApi.getUsers();
+                commit(types.SET_USERS, users);
+
+                resolve();
+            } catch (e) {
+                reject(e)
+            } finally {
+                commit(types.SET_LOADING, false);
             }
         })
     }

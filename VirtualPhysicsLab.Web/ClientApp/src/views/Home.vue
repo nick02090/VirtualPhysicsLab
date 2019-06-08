@@ -85,25 +85,205 @@
                 </div>
             </div>
         </section>
+        <section class="hero is-light is-bold">
+            <div class="hero-body">
+                <div class="control is-flex">
+                    <h1 class="title is-4">Korisnici</h1>
+                    <div class="control margin-left">
+                        <b-field>
+                            <b-input
+                                placeholder="Pretraži..."
+                                type="search"
+                                icon-pack="fas"
+                                icon="search"
+                                v-model="searchQuery"
+                            ></b-input>
+                        </b-field>
+                    </div>
+                </div>
+
+                <div class="flex-container" style="display: inline-block">
+                    <div
+                        class="box"
+                        style="width: 30rem;"
+                        v-for="user in filteredUsers"
+                        :key="user.id"
+                    >
+                        <article class="media">
+                            <div class="media-left">
+                                <figure class="image is-64x64">
+                                    <img :src="user.image">
+                                </figure>
+                            </div>
+                            <div class="media-content">
+                                <div class="content">
+                                    <p>
+                                        <strong>{{user.fullName}}</strong>
+                                        <small
+                                            style="margin-left: 5px"
+                                        >({{user.occupation | occupation}})</small>
+                                        <br>
+                                        <small>{{user.email}}</small>
+                                    </p>
+                                </div>
+                                <nav class="level is-mobile">
+                                    <div class="level-left">
+                                        <span class="margin-5px">
+                                            <b-tooltip type="is-black" label="Profil">
+                                                <span
+                                                    class="icon is-small"
+                                                    style="color: #284e7b; cursor: pointer"
+                                                    @click="openUser(user.id)"
+                                                >
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </span>
+                                            </b-tooltip>
+                                        </span>
+                                        <span class="margin-5px">
+                                            <b-tooltip type="is-black" label="Poveznica">
+                                                <span
+                                                    class="icon is-small"
+                                                    style="color: #284e7b; cursor: pointer"
+                                                    @click="copyToClipboard(user.id)"
+                                                >
+                                                    <i class="fas fa-copy"></i>
+                                                </span>
+                                            </b-tooltip>
+                                        </span>
+                                    </div>
+                                </nav>
+                            </div>
+                        </article>
+                    </div>
+                    <div>
+                        <nav
+                            class="pagination is-rounded"
+                            role="navigation"
+                            aria-label="pagination"
+                        >
+                            <a
+                                class="pagination-previous my-pagination-button"
+                                :class="{'disabled': currentPage == 0}"
+                                @click="previous"
+                            >
+                                <span class="icon">
+                                    <i class="fas fa-angle-left"></i>
+                                </span>Prethodna
+                            </a>
+                            <a
+                                class="pagination-next my-pagination-button"
+                                :class="{'disabled': currentPage == pages - 1 || pages == 0}"
+                                @click="next"
+                            >
+                                Sljedeća
+                                <span class="icon">
+                                    <i class="fas fa-angle-right"></i>
+                                </span>
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 </template>
 
 <script>
-import { mapGetters, mapState } from "vuex";
+import { mapGetters, mapState, mapActions } from "vuex";
+import Occupation from "@/helpers/mixins/Occupation.js";
 
 export default {
     name: "Home",
+    data() {
+        return {
+            users: [],
+            currentPage: 0,
+            pages: 0,
+            batchSize: 5,
+            searchQuery: ""
+        };
+    },
+    mixins: [Occupation],
+    async mounted() {
+        await this.getUsersAsync();
+        this.users = this.getUsers;
+        this.pages = Math.ceil(this.users.length / this.batchSize);
+    },
     computed: {
         ...mapGetters({
-            isLoggedIn: "user/isLoggedIn"
+            isLoggedIn: "user/isLoggedIn",
+            getUsers: "user/getUsers"
         }),
         ...mapState({
             user: state => state.user.user
-        })
+        }),
+        filteredUsers() {
+            var users = [];
+            if (this.searchQuery && this.searchQuery.length == 0) {
+                users = this.users;
+            } else {
+                var regex = new RegExp(this.searchQuery, "i");
+
+                let preparedEntities = this.users.map(e => ({
+                    ...e,
+                    filterObject: {
+                        fullName: e.fullName,
+                        occupation: this.$options.filters.occupation(
+                            e.occupation
+                        ),
+                        email: e.email
+                    }
+                }));
+                users = preparedEntities.filter(e =>
+                    Object.keys(e.filterObject).some(key =>
+                        regex.test(e.filterObject[key])
+                    )
+                );
+            }
+            var end = (this.currentPage + 1) * this.batchSize;
+            var start = end - this.batchSize;
+            return users.slice(start, end);
+        }
     },
     methods: {
+        ...mapActions({
+            getUsersAsync: "user/getUsersAsync"
+        }),
         changeRoute(route) {
             this.$router.push(route);
+        },
+        openUser(id) {
+            this.$router.push(`/profile?id=${id}`);
+        },
+        copyToClipboard(id) {
+            let url = `${window.location.protocol}//${
+                window.location.hostname
+            }:${window.location.port}/profile?id=${id}`;
+            this.copy(url);
+            this.$toast.open({
+                duration: 2500,
+                message: "Poveznica spremljena u međuspremnik.",
+                position: "is-bottom",
+                type: "is-success"
+            });
+        },
+        copy(text) {
+            var dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+        },
+        previous() {
+            if (this.currentPage > 0) {
+                this.currentPage--;
+            }
+        },
+        next() {
+            if (this.currentPage < this.pages - 1) {
+                this.currentPage++;
+            }
         }
     }
 };
@@ -127,5 +307,12 @@ a:hover {
     box-shadow: 1px 1px 20px black;
     z-index: 20;
     cursor: pointer;
+}
+.my-pagination-button {
+    text-decoration: none !important;
+}
+.my-pagination-button.disabled {
+    cursor: not-allowed;
+    color: #bfbfbf !important;
 }
 </style>

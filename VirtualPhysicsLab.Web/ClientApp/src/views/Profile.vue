@@ -1,5 +1,5 @@
 <template>
-    <div id="profile">
+    <div id="profile" v-if="currentUser">
         <div class="tile is-ancestor">
             <div class="tile is-parent is-vertical is-3">
                 <article class="tile is-child notification is-success">
@@ -9,15 +9,15 @@
                             src="https://bulma.io/images/placeholders/128x128.png"
                         >
                     </figure>
-                    <p class="title is-4" style="text-align: right;">{{user.fullName}}</p>
+                    <p class="title is-4" style="text-align: right;">{{currentUser.fullName}}</p>
                 </article>
                 <article class="tile is-child notification" style="text-align: left;">
                     <p>
                         <b>Stručnost:</b>
-                        <span class="user-info">{{user.occupation | occupation}}</span>
+                        <span class="user-info">{{currentUser.occupation | occupation}}</span>
                         <br>
                         <b>E-mail:</b>
-                        <span class="user-info">{{user.email}}</span>
+                        <span class="user-info">{{currentUser.email}}</span>
                         <br>
                         <b>Br. pokusa:</b>
                         <span class="user-info">{{experiments.length}}</span>
@@ -92,7 +92,10 @@
                                                         </span>
                                                     </b-tooltip>
                                                 </span>
-                                                <span class="margin-5px">
+                                                <span
+                                                    class="margin-5px"
+                                                    v-if="user && currentUser.id == user.id"
+                                                >
                                                     <b-tooltip type="is-black" label="Izbriši">
                                                         <span
                                                             class="icon is-small"
@@ -125,7 +128,7 @@
                                     </a>
                                     <a
                                         class="pagination-next my-pagination-button"
-                                        :class="{'disabled': currentPage == pages - 1 || experimentsLoading}"
+                                        :class="{'disabled': currentPage == pages - 1 || pages == 0 || experimentsLoading}"
                                         @click="next"
                                     >
                                         Sljedeća
@@ -154,22 +157,30 @@ export default {
             currentPage: 0,
             pages: 0,
             batchSize: 3,
-            searchQuery: ""
+            searchQuery: "",
+            currentUser: null
         };
     },
     mixins: [Occupation],
     async mounted() {
-        await this.getByUser(this.user.id);
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get("id");
+        if (id) {
+            await this.getUser(id);
+            this.currentUser = this.profile;
+            await this.getByUser(id);
+        } else {
+            this.currentUser = this.user;
+            await this.getByUser(this.user.id);
+        }
         this.pages = Math.ceil(this.experiments.length / this.batchSize);
     },
     computed: {
         ...mapState({
             user: state => state.user.user,
             experiments: state => state.experiment.experiments,
-            experimentsLoading: state => state.experiment.loading
-        }),
-        ...mapGetters({
-            isLoggedIn: "user/isLoggedIn"
+            experimentsLoading: state => state.experiment.loading,
+            profile: state => state.user.profile
         }),
         filteredExperiments() {
             var experiments = [];
@@ -200,7 +211,8 @@ export default {
     methods: {
         ...mapActions({
             getByUser: "experiment/getByUser",
-            deleteExperimentAsync: "experiment/deleteExperiment"
+            deleteExperimentAsync: "experiment/deleteExperiment",
+            getUser: "user/getUser"
         }),
         deleteExperiment(id, name) {
             this.$dialog.confirm({
@@ -213,7 +225,7 @@ export default {
                         position: "is-bottom",
                         type: "is-success"
                     });
-                    await this.getByUser(this.user.id);
+                    await this.getByUser(this.currentUser.id);
                     this.pages = Math.ceil(
                         this.experiments.length / this.batchSize
                     );

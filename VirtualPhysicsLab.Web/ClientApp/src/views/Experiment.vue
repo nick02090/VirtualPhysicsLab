@@ -9,6 +9,7 @@
                         @error="error"
                         @unlockPlaying="unlockPlaying"
                         @lockPlaying="lockPlaying"
+                        ref="menu"
                     />
                 </article>
             </div>
@@ -196,6 +197,7 @@
 import colors from "@/helpers/colors.js";
 import babylon from "@/helpers/babylon/babylon.js";
 import Menu from "@/components/experiment/Menu.vue";
+import MojPokus from "@/components/experiment/menus/MojPokus.vue";
 import { mapActions, mapState, mapGetters } from "vuex";
 
 export default {
@@ -219,6 +221,14 @@ export default {
     components: {
         Menu
     },
+    beforeDestroy() {
+        let allMeshes = Array.from(this.existingMeshes);
+        for (var i in allMeshes) {
+            var mesh = allMeshes[i];
+            var obj = this.getMeshByName(mesh);
+            babylon.deleteMesh(obj, mesh);
+        }
+    },
     async mounted() {
         const urlParams = new URLSearchParams(window.location.search);
         const id = urlParams.get("id");
@@ -229,10 +239,32 @@ export default {
             this.engine.displayLoadingUI();
             this.engine.loadingUIText = "Dohvaćanje pokusa...";
             await this.getExperiment(id);
+            if (this.isLoggedIn) {
+                if (this.experiment.createdBy.id == this.user.id) {
+                    this.$refs["menu"].menus.push({
+                        name: "Postavke",
+                        menus: [
+                            {
+                                name: "Moj pokus",
+                                component: MojPokus
+                            }
+                        ]
+                    });
+                }
+            }
             await this.loadScene(this.experiment);
             return;
         }
         if (this.isLoggedIn) {
+            this.$refs["menu"].menus.push({
+                name: "Postavke",
+                menus: [
+                    {
+                        name: "Moj pokus",
+                        component: MojPokus
+                    }
+                ]
+            });
             await this.getByUser(this.user.id);
             this.pages = Math.ceil(this.experiments.length / this.batchSize);
         }
@@ -244,10 +276,12 @@ export default {
             experiments: state => state.experiment.experiments,
             meshes: state => state.experiment.experimentMeshes,
             experimentsLoading: state => state.experiment.loading,
-            experiment: state => state.experiment.experiment
+            experiment: state => state.experiment.experiment,
+            existingMeshes: state => state.experiment.meshes
         }),
         ...mapGetters({
-            isLoggedIn: "user/isLoggedIn"
+            isLoggedIn: "user/isLoggedIn",
+            getMeshByName: "experiment/getMeshByName"
         }),
         scene: {
             get: function() {

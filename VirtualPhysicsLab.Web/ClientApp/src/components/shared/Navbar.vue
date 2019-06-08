@@ -3,7 +3,7 @@
         <section class="hero is-light is-flex">
             <div class="brand">
                 <div class="control is-flex">
-                    <div v-if="isLoggedIn" class="control is-flex" style="display: inline-block">
+                    <div v-if="isLoggedIn" class="control is-flex">
                         <b-button rounded outlined icon-left="sign-out-alt" @click="logout">Odjava</b-button>
                     </div>
                     <div class="control margin-right margin-left">
@@ -17,6 +17,7 @@
                 :menu-count="3"
                 :icon-class="icons"
                 :menu-url-list="urls"
+                @process="process"
                 position="top-right"
                 background-color="#284e7b"
                 ref="quickmenu"
@@ -36,9 +37,9 @@ export default {
         return {
             icons: ["fas fa-home", "fas fa-flask", "fas fa-user"],
             urls: [
-                { isLink: true, url: "/home" },
-                { isLink: true, url: "/experiment" },
-                { isLink: true, url: "/profile" }
+                { isLink: false, url: "/home" },
+                { isLink: false, url: "/experiment" },
+                { isLink: false, url: "/profile" }
             ]
         };
     },
@@ -57,6 +58,58 @@ export default {
         ...mapActions({
             systemLogout: "user/logout"
         }),
+        process(index) {
+            switch (index) {
+                case 0:
+                    this.change("home");
+                    break;
+                case 1:
+                    this.change("experiment");
+                    break;
+                case 2:
+                    this.change("profile");
+                    break;
+                default:
+                    break;
+            }
+        },
+        change(to) {
+            var path = window.location.pathname;
+            if (to == "experiment") {
+                if (path.includes("experiment")) {
+                    var newurl =
+                        window.location.protocol +
+                        "//" +
+                        window.location.host +
+                        "/experiment";
+                    window.location.replace(newurl);
+                    this.$refs.quickmenu.$el.classList.remove("active");
+                    return;
+                } else {
+                    this.$router.push("experiment");
+                    this.$refs.quickmenu.$el.classList.remove("active");
+                    return;
+                }
+            }
+            if (to == "profile") {
+                if (path.includes("profile")) {
+                    var newurl =
+                        window.location.protocol +
+                        "//" +
+                        window.location.host +
+                        "/profile";
+                    window.location.replace(newurl);
+                    this.$refs.quickmenu.$el.classList.remove("active");
+                    return;
+                } else {
+                    this.$router.push("profile");
+                    this.$refs.quickmenu.$el.classList.remove("active");
+                    return;
+                }
+            }
+            this.$router.push(to);
+            this.$refs.quickmenu.$el.classList.remove("active");
+        },
         async logout() {
             await this.systemLogout();
             this.$toast.open({
@@ -65,13 +118,6 @@ export default {
                 position: "is-bottom"
             });
             this.$router.push("home");
-        }
-    },
-    watch: {
-        $route(to, from) {
-            if (this.$refs.quickmenu.$el.classList.contains("active")) {
-                this.$refs.quickmenu.$el.classList.remove("active");
-            }
         }
     }
 };

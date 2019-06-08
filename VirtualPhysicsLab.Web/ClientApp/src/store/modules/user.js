@@ -15,7 +15,8 @@ const types = {
     SET_LOADING: "SET_LOADING",
     SET_USER: "SET_USER",
     SET_TOKEN: "SET_TOKEN",
-    SET_ORGANIZATION_DATA: "SET_ORGANIZATION_DATA"
+    SET_ORGANIZATION_DATA: "SET_ORGANIZATION_DATA",
+    SET_PROFILE: "SET_PROFILE"
 }
 
 // state
@@ -23,7 +24,8 @@ const state = {
     loading: false,
     user: null,
     organizationData: null,
-    token: localStorage.getItem('token') || null
+    token: localStorage.getItem('token') || null,
+    profile: null
 }
 
 const mutations = {
@@ -38,6 +40,9 @@ const mutations = {
     },
     [types.SET_ORGANIZATION_DATA](state, data) {
         state.organizationData = data;
+    },
+    [types.SET_PROFILE](state, data) {
+        state.profile = data;
     }
 }
 
@@ -134,6 +139,27 @@ const actions = {
                 reject(e);
             } finally {
                 commit(types.SET_LOADING, false);
+            }
+        })
+    },
+    async getUser({
+        state,
+        commit,
+        dispatch,
+        rootState
+    }, id) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                commit(types.SET_LOADING, true)
+
+                var userData = await userApi.getUser(id);
+                commit(types.SET_PROFILE, userData);
+
+                resolve();
+            } catch (e) {
+                reject(e);
+            } finally {
+                commit(types.SET_LOADING, false)
             }
         })
     },

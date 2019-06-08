@@ -42,7 +42,7 @@ namespace VirtualPhysicsLab.Web.Controllers
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser([FromQuery] Guid id)
+        public async Task<IActionResult> GetUser([FromRoute] Guid id)
         {
             if (!ModelState.IsValid)
             {

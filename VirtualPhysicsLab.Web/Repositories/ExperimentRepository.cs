@@ -46,6 +46,10 @@ namespace VirtualPhysicsLab.Web.Repositories
                 .Include(x => x.Settings)
                 .Select(x => new Experiment
                 {
+                    CreatedBy = new User
+                    {
+                        Id = x.CreatedBy.Id
+                    },
                     Settings = x.Settings,
                     CreatedOn = x.CreatedOn,
                     Description = x.Description,

@@ -34,6 +34,11 @@ router.beforeEach(async (to, from, next) => {
     }
   }
   if (to.meta.userRequired === true) {
+    var userId = to.query["id"]
+    if (userId) {
+      next();
+      return;
+    }
     if (!store.getters["user/isLoggedIn"]) {
       next('/login');
       return;

@@ -61,5 +61,11 @@ export default {
         var response = await axios.get('/api/user/organization-data');
 
         return response.data;
+    },
+    async getUser(id) {
+
+        var response = await axios.get(`/api/user/${id}`);
+
+        return response.data;
     }
 }

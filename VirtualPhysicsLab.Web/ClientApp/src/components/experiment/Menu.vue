@@ -65,6 +65,7 @@ export default {
         return {
             isMenu: true,
             secondsCounter: 1,
+            interval: null,
             physics: [
                 {
                     name: "Brzina",
@@ -117,19 +118,11 @@ export default {
         Statistika,
         MojPokus
     },
+    beforeDestroy() {
+        clearInterval(this.interval);
+    },
     mounted() {
-        if (this.isLoggedIn) {
-            this.menus.push({
-                name: "Postavke",
-                menus: [
-                    {
-                        name: "Moj pokus",
-                        component: MojPokus
-                    }
-                ]
-            });
-        }
-        setInterval(() => {
+        this.interval = setInterval(() => {
             this.updateLogs();
         }, 1);
     },
@@ -141,8 +134,7 @@ export default {
         ...mapGetters({
             getMeshByName: "experiment/getMeshByName",
             getMeshLog: "experiment/getMeshLog",
-            getMeshPhysic: "experiment/getMeshPhysic",
-            isLoggedIn: "user/isLoggedIn"
+            getMeshPhysic: "experiment/getMeshPhysic"
         })
     },
     methods: {

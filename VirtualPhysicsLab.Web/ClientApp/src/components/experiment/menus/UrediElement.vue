@@ -12,7 +12,7 @@
         <div class="field" v-else>
             <b-field horizontal label="Element:">
                 <div class="select">
-                    <select v-model="mesh" :disabled="isDrag">
+                    <select v-model="mesh" :disabled="isDrag || isScale">
                         <option v-for="mesh in existingMeshes" :key="mesh" :value="mesh">{{mesh}}</option>
                     </select>
                 </div>
@@ -116,7 +116,7 @@
                     <button
                         class="button is-danger"
                         @click="deleteMesh"
-                        :disabled="isDrag || !isPlaying"
+                        :disabled="isDrag || !isPlaying || isScale"
                     >
                         <span class="icon">
                             <i class="fas fa-times"></i>
@@ -598,11 +598,12 @@ export default {
         }
     },
     watch: {
-        "size.x": function() {
+        "size.x"(newSize, previousSize) {
             if (this.enter.x) {
                 this.enter.x = false;
                 return;
             }
+            if (previousSize == newSize) return;
             if (this.isPlaying) {
                 var obj = this.getMeshByName(this.mesh);
                 obj.scaling = new BABYLON.Vector3(
@@ -612,11 +613,12 @@ export default {
                 );
             }
         },
-        "size.y": function() {
+        "size.y"(newSize, previousSize) {
             if (this.enter.y) {
                 this.enter.y = false;
                 return;
             }
+            if (previousSize == newSize) return;
             if (this.isPlaying) {
                 var obj = this.getMeshByName(this.mesh);
                 obj.scaling = new BABYLON.Vector3(
@@ -626,11 +628,12 @@ export default {
                 );
             }
         },
-        "size.z": function() {
+        "size.z"(newSize, previousSize) {
             if (this.enter.z) {
                 this.enter.z = false;
                 return;
             }
+            if (previousSize == newSize) return;
             if (this.isPlaying) {
                 var obj = this.getMeshByName(this.mesh);
                 obj.scaling = new BABYLON.Vector3(
@@ -660,6 +663,9 @@ export default {
             }
             if (newMesh) {
                 var obj = this.getMeshByName(newMesh);
+                this.enter.x = true;
+                this.enter.y = true;
+                this.enter.z = true;
                 this.size.x = obj.scaling.x;
                 this.size.y = obj.scaling.y;
                 this.size.z = obj.scaling.z;

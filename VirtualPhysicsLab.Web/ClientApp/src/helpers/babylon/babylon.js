@@ -221,6 +221,22 @@ export default {
             );
             obj.rotationQuaternion = quaternion;
             obj.scaling = new BABYLON.Vector3(mesh.settings.size.x, mesh.settings.size.y, mesh.settings.size.z);
+
+            var meshLog = {
+                mesh: mesh.name,
+                log: {
+                    name: "Stvoren element",
+                    icon: "fas fa-plus",
+                    type: "life",
+                    key: mesh.name,
+                    description: `(${mesh.name})`,
+                    properties: {
+                        time: Date.now(),
+                        position: obj.position
+                    }
+                }
+            };
+            store.commit("experiment/SET_MESH_LOGS", meshLog);
         }
 
         if (experiment.settings.axis === false) {

@@ -2,14 +2,14 @@ export default {
     create(properties, material, scene) {
         var box = BABYLON.MeshBuilder.CreateBox(
             properties.name, {
-                width: 2,
-                height: 2,
-                depth: 2
+                width: 1,
+                height: 1,
+                depth: 1
             },
             scene
         );
         box.position.x = 0;
-        box.position.y = 0;
+        box.position.y = -0.5;
         box.position.z = 0;
         box.physicsImpostor = new BABYLON.PhysicsImpostor(
             box,

@@ -2,6 +2,7 @@ import * as meshTypes from "./mesh-types"
 import box from "./box";
 import sphere from "./sphere";
 import store from "@/store/index.js"
+import cylinder from "./cylinder";
 
 export default {
     create(type, properties, material, scene) {
@@ -12,6 +13,9 @@ export default {
                 break;
             case meshTypes.SPHERE:
                 newMesh = sphere.create(properties, material, scene);
+                break;
+            case meshTypes.CYLINDER:
+                newMesh = cylinder.create(properties, material, scene);
                 break;
             default:
                 console.error("Invalid type of mesh!");
@@ -57,8 +61,8 @@ export default {
         var ground = store.state.experiment.ground;
         var groundSize = ground.getBoundingInfo().boundingBox.extendSize;
 
-        for (var z = -groundSize.z; z <= groundSize.z; z += 0.1) {
-            for (var x = -groundSize.x; x <= groundSize.x; x += 0.1) {
+        for (var z = -groundSize.z + 1; z <= groundSize.z - 1; z += 0.1) {
+            for (var x = -groundSize.x + 1; x <= groundSize.x - 1; x += 0.1) {
                 mesh.position.x = x;
                 mesh.position.z = z;
                 scene.render();
@@ -162,23 +166,23 @@ export default {
         scene.registerBeforeRender(function () {
             let physicsImpostor = store.state.experiment.physicsImpostor;
             if (!mesh.isDisposed()) {
-                if (physicsImpostor !== null) {
-                    if (mesh.position.x > north) {
-                        mesh.position.x = north;
-                    }
-                    if (mesh.position.x < south) {
-                        mesh.position.x = south;
-                    }
-                    if (mesh.position.z > east) {
-                        mesh.position.z = east;
-                    }
-                    if (mesh.position.z < west) {
-                        mesh.position.z = west;
-                    }
-                    if (mesh.position.y < 0) {
-                        mesh.position.y = 0;
-                    }
-                }
+                // if (physicsImpostor !== null) {
+                //     if (mesh.position.x > north) {
+                //         mesh.position.x = north;
+                //     }
+                //     if (mesh.position.x < south) {
+                //         mesh.position.x = south;
+                //     }
+                //     if (mesh.position.z > east) {
+                //         mesh.position.z = east;
+                //     }
+                //     if (mesh.position.z < west) {
+                //         mesh.position.z = west;
+                //     }
+                //     if (mesh.position.y < 0) {
+                //         mesh.position.y = 0;
+                //     }
+                // }
                 if (mesh.position.y < -30) {
                     mesh.dispose();
                     store.commit("experiment/DELETE_MESH", mesh.name);

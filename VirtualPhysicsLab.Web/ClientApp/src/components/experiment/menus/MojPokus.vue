@@ -16,7 +16,7 @@
 
         <div class="buttons">
             <b-button type="is-success" icon-left="save" @click="save">Novi pokus</b-button>
-            <b-button type="is-warning" icon-left="pen" @click="update" v-if="id">Ažuriraj pokus</b-button>
+            <b-button type="is-warning" icon-left="pen" @click="update" v-if="id">Spremi promjene</b-button>
         </div>
 
         <b-loading :is-full-page="true" :active="isLoading"></b-loading>

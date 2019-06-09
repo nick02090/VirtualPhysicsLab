@@ -17,7 +17,22 @@
                     </select>
                 </div>
             </b-field>
-            <b-table :data="physic" hoverable paginated :per-page="5" :pagination-simple="true">
+
+            <button class="button is-link is-fullwidth is-outlined" @click="createPhysic">
+                <span class="icon">
+                    <i class="fas fa-plus"></i>
+                </span>
+                <span>Dodaj</span>
+            </button>
+
+            <b-table
+                :data="physic"
+                hoverable
+                paginated
+                :per-page="5"
+                :pagination-simple="true"
+                class="my-table"
+            >
                 <template slot="header">Fizička svojstva</template>
 
                 <template slot-scope="props">
@@ -37,15 +52,6 @@
                             <p>Ne postoji fizika odabranog elementa.</p>
                         </div>
                     </section>
-                </template>
-
-                <template slot="footer">
-                    <button class="button is-link is-fullwidth is-outlined" @click="createPhysic">
-                        <span class="icon">
-                            <i class="fas fa-plus"></i>
-                        </span>
-                        <span>Dodaj</span>
-                    </button>
                 </template>
             </b-table>
 
@@ -299,4 +305,14 @@ export default {
 </script>
 
 <style scoped>
+.my-table .level {
+    margin-top: auto;
+    bottom: 0px;
+    position: absolute;
+    width: calc(100% - 40px);
+}
+
+.my-table .table td {
+    padding: 3px;
+}
 </style>

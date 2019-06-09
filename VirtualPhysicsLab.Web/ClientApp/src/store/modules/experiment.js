@@ -400,7 +400,7 @@ const actions = {
 
                     var meshId = await meshApi.createMesh(mesh);
 
-                    var size = obj.getBoundingInfo().boundingBox.extendSize;
+                    var size = obj.scaling;
                     var position = obj.position;
                     var rotation = obj.rotationQuaternion.toEulerAngles();
                     var mass = obj.physicsImpostor.mass;
@@ -422,9 +422,9 @@ const actions = {
                         friction: friction,
                         restitution: restitution,
                         size: {
-                            x: size.x * 2,
-                            y: size.y * 2,
-                            z: size.z * 2
+                            x: size.x,
+                            y: size.y,
+                            z: size.z
                         },
                         position: {
                             x: position.x,
@@ -526,7 +526,7 @@ const actions = {
                         update = false;
                     }
 
-                    var size = obj.getBoundingInfo().boundingBox.extendSize;
+                    var size = obj.scaling;
                     var position = obj.position;
                     var rotation = obj.rotationQuaternion.toEulerAngles();
                     var mass = obj.physicsImpostor.mass;
@@ -548,9 +548,9 @@ const actions = {
                         friction: friction,
                         restitution: restitution,
                         size: {
-                            x: size.x * 2,
-                            y: size.y * 2,
-                            z: size.z * 2
+                            x: size.x,
+                            y: size.y,
+                            z: size.z
                         },
                         position: {
                             x: position.x,

@@ -98,7 +98,11 @@ export default {
     },
     showAxis() {
         var scene = store.state.experiment.scene;
-        var start = new BABYLON.Vector3(-10, -1, -10);
+        var ground = store.state.experiment.ground;
+        var groundSize = ground.getBoundingInfo().boundingBox.extendSize;
+        var x = groundSize.x;
+        var z = groundSize.z;
+        var start = new BABYLON.Vector3(-x, -1, -z);
         var axis = this.createAxis(start, 5, scene);
         store.commit("experiment/SET_AXIS", axis);
     },
@@ -175,6 +179,9 @@ export default {
                 case 1:
                     type = "SPHERE";
                     break;
+                case 7:
+                    type = "CYLINDER";
+                    break;
                 default:
                     break;
             }
@@ -213,6 +220,7 @@ export default {
                 rotation.z
             );
             obj.rotationQuaternion = quaternion;
+            obj.scaling = new BABYLON.Vector3(mesh.settings.size.x, mesh.settings.size.y, mesh.settings.size.z);
         }
 
         if (experiment.settings.axis === false) {
@@ -224,7 +232,7 @@ export default {
         store.state.experiment.ground.physicsImpostor.friction = experiment.settings.friction;
         store.state.experiment.ground.physicsImpostor.restitution = experiment.settings.restitution;
     },
-    createEmptyScene(canvas, engine) {
+    createEmptyScene(canvas, engine, polygon) {
         var scene = new BABYLON.Scene(engine);
 
         var camera = new BABYLON.ArcRotateCamera(
@@ -262,9 +270,9 @@ export default {
         scene.enablePhysics(gravityVector, physicsPlugin);
 
         var ground = new BABYLON.MeshBuilder.CreateBox("ground", {
-            width: 20,
+            width: polygon,
             height: 1,
-            depth: 20
+            depth: polygon
         }, scene);
         ground.position.y = -1.5;
         ground.physicsImpostor = new BABYLON.PhysicsImpostor(
@@ -297,7 +305,10 @@ export default {
         zDragBehaviour.useObjectOrienationForDragging = false;
         store.commit("experiment/SET_DRAG_BEHAVIOUR", [xDragBehaviour, yDragBehaviour, zDragBehaviour]);
 
-        var start = new BABYLON.Vector3(-10, -1, -10);
+        var groundSize = ground.getBoundingInfo().boundingBox.extendSize;
+        var x = groundSize.x;
+        var z = groundSize.z;
+        var start = new BABYLON.Vector3(-x, -1, -z);
         var axis = this.createAxis(start, 5, scene);
         store.commit("experiment/SET_AXIS", axis);
 

@@ -17,191 +17,293 @@
                     </select>
                 </div>
             </b-field>
-            <div class="control is-flex">
-                <div class="control margin-right">
-                    <label class="label">Koordinatne osi</label>
-                </div>
-                <div class="control margin-left">
-                    <b-tooltip
-                        type="is-black"
-                        label="Uključi/Isključi prikaz lokalnih koordinatnih osi."
-                    >
-                        <b-switch v-model="hasAxis" @input="switchAxis"></b-switch>
-                    </b-tooltip>
-                </div>
-            </div>
-            <div class="control is-flex">
-                <div class="control margin-right">
-                    <label class="label">Pomakni</label>
-                </div>
-                <div class="control margin-left" style="text-align: right">
-                    <b-tooltip
-                        v-if="hasCollisions && isDrag"
-                        type="is-black"
-                        label="Postoje kolizije!"
-                    >
-                        <b-switch v-model="isDrag" disabled></b-switch>
-                    </b-tooltip>
-                    <b-switch v-else v-model="isDrag" @input="switchDrag"></b-switch>
 
-                    <div class="block">
-                        <b-radio v-model="axis" :native-value="0" :disabled="!isDrag">x</b-radio>
-                        <b-radio v-model="axis" :native-value="1" :disabled="!isDrag">y</b-radio>
-                        <b-radio v-model="axis" :native-value="2" :disabled="!isDrag">z</b-radio>
+            <nav class="breadcrumb is-centered has-bullet-separator" aria-label="breadcrumbs">
+                <ul>
+                    <li :class="{'is-active': group == 0}">
+                        <a @click="switchGroup(0)">
+                            <span class="icon is-small">
+                                <i class="fas fa-home" aria-hidden="true"></i>
+                            </span>
+                            <span>Općenito</span>
+                        </a>
+                    </li>
+                    <li :class="{'is-active': group == 1}">
+                        <a @click="switchGroup(1)">
+                            <span class="icon is-small">
+                                <i class="fas fa-crosshairs" aria-hidden="true"></i>
+                            </span>
+                            <span>Položaj</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div v-if="group == 0">
+                <div class="control is-flex">
+                    <div class="control margin-right">
+                        <label class="label">Koordinatne osi</label>
+                    </div>
+                    <div class="control margin-left">
+                        <b-tooltip
+                            type="is-black"
+                            label="Uključi/Isključi prikaz lokalnih koordinatnih osi."
+                        >
+                            <b-switch v-model="hasAxis" @input="switchAxis"></b-switch>
+                        </b-tooltip>
                     </div>
                 </div>
-            </div>
-            <div class="field">
-                <label class="label">Rotacija (os X)</label>
-                <b-field>
-                    <b-field>
-                        <b-tooltip label="Stupnjevi" type="is-black">
-                            <b-input v-model="rotation.x.d" type="number" @input="setRotation(0)"></b-input>
+                <div class="control is-flex">
+                    <div class="control margin-right">
+                        <label class="label">Veličina</label>
+                    </div>
+                    <div class="control margin-left">
+                        <b-tooltip
+                            type="is-black"
+                            label="Uključi/Isključi podešavanje veličine elementa."
+                        >
+                            <b-switch
+                                v-model="isScale"
+                                @input="switchScale"
+                                :disabled="isDrag || !isPlaying"
+                            ></b-switch>
                         </b-tooltip>
-                        <p class="control">
-                            <span class="button is-static">°</span>
-                        </p>
-                    </b-field>
-                    <b-field>
-                        <b-tooltip label="Minute" type="is-black">
-                            <b-input
-                                v-model="rotation.x.m"
-                                name="minutes"
-                                type="number"
-                                @input="setRotation(0)"
-                                v-validate="'numeric|min_value:0|max_value:59'"
-                            ></b-input>
-                        </b-tooltip>
-                        <p class="control">
-                            <span class="button is-static">'</span>
-                        </p>
-                    </b-field>
-                    <b-field>
-                        <b-tooltip label="Sekunde" type="is-black">
-                            <b-input
-                                v-model="rotation.x.s"
-                                name="seconds"
-                                type="number"
-                                @input="setRotation(0)"
-                                v-validate="'numeric|min_value:0|max_value:59'"
-                            ></b-input>
-                        </b-tooltip>
-                        <p class="control">
-                            <span class="button is-static">"</span>
-                        </p>
-                    </b-field>
-                    <b-tooltip label="Resetiraj" type="is-black">
-                        <button class="button is-warning" @click="resetRotation(0)">
-                            <span class="icon">
-                                <i class="fas fa-redo"></i>
-                            </span>
-                        </button>
-                    </b-tooltip>
+                    </div>
+                </div>
+                <b-field horizontal label="x-os">
+                    <b-numberinput
+                        :step="0.1"
+                        v-model="size.x"
+                        :min="0.1"
+                        :max="5"
+                        controls-position="compact"
+                        controls-rounded
+                        type="is-success"
+                        :editable="false"
+                        expanded
+                        :disabled="!isScale"
+                    ></b-numberinput>
                 </b-field>
-            </div>
-            <div class="field">
-                <label class="label">Rotacija (os Y)</label>
-                <b-field>
-                    <b-field>
-                        <b-tooltip label="Stupnjevi" type="is-black">
-                            <b-input v-model="rotation.y.d" type="number" @input="setRotation(1)"></b-input>
-                        </b-tooltip>
-                        <p class="control">
-                            <span class="button is-static">°</span>
-                        </p>
-                    </b-field>
-                    <b-field>
-                        <b-tooltip label="Minute" type="is-black">
-                            <b-input
-                                v-model="rotation.y.m"
-                                name="minutes"
-                                type="number"
-                                @input="setRotation(1)"
-                                v-validate="'numeric|min_value:0|max_value:59'"
-                            ></b-input>
-                        </b-tooltip>
-                        <p class="control">
-                            <span class="button is-static">'</span>
-                        </p>
-                    </b-field>
-                    <b-field>
-                        <b-tooltip label="Sekunde" type="is-black">
-                            <b-input
-                                v-model="rotation.y.s"
-                                name="seconds"
-                                type="number"
-                                @input="setRotation(1)"
-                                v-validate="'numeric|min_value:0|max_value:59'"
-                            ></b-input>
-                        </b-tooltip>
-                        <p class="control">
-                            <span class="button is-static">"</span>
-                        </p>
-                    </b-field>
-                    <b-tooltip label="Resetiraj" type="is-black">
-                        <button class="button is-warning" @click="resetRotation(1)">
-                            <span class="icon">
-                                <i class="fas fa-redo"></i>
-                            </span>
-                        </button>
-                    </b-tooltip>
+                <b-field horizontal label="y-os">
+                    <b-numberinput
+                        :step="0.1"
+                        v-model="size.y"
+                        :min="0.1"
+                        :max="5"
+                        controls-position="compact"
+                        controls-rounded
+                        type="is-success"
+                        :editable="false"
+                        expanded
+                        :disabled="!isScale"
+                    ></b-numberinput>
                 </b-field>
-            </div>
-            <div class="field">
-                <label class="label">Rotacija (os Z)</label>
-                <b-field>
-                    <b-field>
-                        <b-tooltip label="Stupnjevi" type="is-black">
-                            <b-input v-model="rotation.z.d" type="number" @input="setRotation(2)"></b-input>
-                        </b-tooltip>
-                        <p class="control">
-                            <span class="button is-static">°</span>
-                        </p>
-                    </b-field>
-                    <b-field>
-                        <b-tooltip label="Minute" type="is-black">
-                            <b-input
-                                v-model="rotation.z.m"
-                                name="minutes"
-                                type="number"
-                                @input="setRotation(2)"
-                                v-validate="'numeric|min_value:0|max_value:59'"
-                            ></b-input>
-                        </b-tooltip>
-                        <p class="control">
-                            <span class="button is-static">'</span>
-                        </p>
-                    </b-field>
-                    <b-field>
-                        <b-tooltip label="Sekunde" type="is-black">
-                            <b-input
-                                v-model="rotation.z.s"
-                                name="seconds"
-                                type="number"
-                                @input="setRotation(2)"
-                                v-validate="'numeric|min_value:0|max_value:59'"
-                            ></b-input>
-                        </b-tooltip>
-                        <p class="control">
-                            <span class="button is-static">"</span>
-                        </p>
-                    </b-field>
-                    <b-tooltip label="Resetiraj" type="is-black">
-                        <button class="button is-warning" @click="resetRotation(2)">
-                            <span class="icon">
-                                <i class="fas fa-redo"></i>
-                            </span>
-                        </button>
-                    </b-tooltip>
+                <b-field horizontal label="z-os">
+                    <b-numberinput
+                        :step="0.1"
+                        v-model="size.z"
+                        :min="0.1"
+                        :max="5"
+                        controls-position="compact"
+                        controls-rounded
+                        type="is-success"
+                        :editable="false"
+                        expanded
+                        :disabled="!isScale"
+                    ></b-numberinput>
                 </b-field>
+                <div class="field">
+                    <button
+                        class="button is-danger"
+                        @click="deleteMesh"
+                        :disabled="isDrag || !isPlaying"
+                    >
+                        <span class="icon">
+                            <i class="fas fa-times"></i>
+                        </span>
+                        <span>Izbriši</span>
+                    </button>
+                </div>
             </div>
-            <div class="field">
-                <button class="button is-danger" @click="deleteMesh">
-                    <span class="icon">
-                        <i class="fas fa-times"></i>
-                    </span>
-                    <span>Izbriši</span>
-                </button>
+
+            <div v-if="group == 1">
+                <div class="control is-flex">
+                    <div class="control margin-right">
+                        <label class="label">Pomakni</label>
+                    </div>
+                    <div class="control margin-left" style="text-align: right">
+                        <b-tooltip
+                            v-if="hasCollisions && isDrag"
+                            type="is-black"
+                            label="Postoje kolizije!"
+                        >
+                            <b-switch v-model="isDrag" disabled></b-switch>
+                        </b-tooltip>
+                        <b-switch v-else v-model="isDrag" @input="switchDrag"></b-switch>
+
+                        <div class="block">
+                            <b-radio v-model="axis" :native-value="0" :disabled="!isDrag">x</b-radio>
+                            <b-radio v-model="axis" :native-value="1" :disabled="!isDrag">y</b-radio>
+                            <b-radio v-model="axis" :native-value="2" :disabled="!isDrag">z</b-radio>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Rotacija (os X)</label>
+                    <b-field>
+                        <b-field>
+                            <b-tooltip label="Stupnjevi" type="is-black">
+                                <b-input
+                                    v-model="rotation.x.d"
+                                    type="number"
+                                    @input="setRotation(0)"
+                                ></b-input>
+                            </b-tooltip>
+                            <p class="control">
+                                <span class="button is-static">°</span>
+                            </p>
+                        </b-field>
+                        <b-field>
+                            <b-tooltip label="Minute" type="is-black">
+                                <b-input
+                                    v-model="rotation.x.m"
+                                    name="minutes"
+                                    type="number"
+                                    @input="setRotation(0)"
+                                    v-validate="'numeric|min_value:0|max_value:59'"
+                                ></b-input>
+                            </b-tooltip>
+                            <p class="control">
+                                <span class="button is-static">'</span>
+                            </p>
+                        </b-field>
+                        <b-field>
+                            <b-tooltip label="Sekunde" type="is-black">
+                                <b-input
+                                    v-model="rotation.x.s"
+                                    name="seconds"
+                                    type="number"
+                                    @input="setRotation(0)"
+                                    v-validate="'numeric|min_value:0|max_value:59'"
+                                ></b-input>
+                            </b-tooltip>
+                            <p class="control">
+                                <span class="button is-static">"</span>
+                            </p>
+                        </b-field>
+                        <b-tooltip label="Resetiraj" type="is-black">
+                            <button class="button is-warning" @click="resetRotation(0)">
+                                <span class="icon">
+                                    <i class="fas fa-redo"></i>
+                                </span>
+                            </button>
+                        </b-tooltip>
+                    </b-field>
+                </div>
+                <div class="field">
+                    <label class="label">Rotacija (os Y)</label>
+                    <b-field>
+                        <b-field>
+                            <b-tooltip label="Stupnjevi" type="is-black">
+                                <b-input
+                                    v-model="rotation.y.d"
+                                    type="number"
+                                    @input="setRotation(1)"
+                                ></b-input>
+                            </b-tooltip>
+                            <p class="control">
+                                <span class="button is-static">°</span>
+                            </p>
+                        </b-field>
+                        <b-field>
+                            <b-tooltip label="Minute" type="is-black">
+                                <b-input
+                                    v-model="rotation.y.m"
+                                    name="minutes"
+                                    type="number"
+                                    @input="setRotation(1)"
+                                    v-validate="'numeric|min_value:0|max_value:59'"
+                                ></b-input>
+                            </b-tooltip>
+                            <p class="control">
+                                <span class="button is-static">'</span>
+                            </p>
+                        </b-field>
+                        <b-field>
+                            <b-tooltip label="Sekunde" type="is-black">
+                                <b-input
+                                    v-model="rotation.y.s"
+                                    name="seconds"
+                                    type="number"
+                                    @input="setRotation(1)"
+                                    v-validate="'numeric|min_value:0|max_value:59'"
+                                ></b-input>
+                            </b-tooltip>
+                            <p class="control">
+                                <span class="button is-static">"</span>
+                            </p>
+                        </b-field>
+                        <b-tooltip label="Resetiraj" type="is-black">
+                            <button class="button is-warning" @click="resetRotation(1)">
+                                <span class="icon">
+                                    <i class="fas fa-redo"></i>
+                                </span>
+                            </button>
+                        </b-tooltip>
+                    </b-field>
+                </div>
+                <div class="field">
+                    <label class="label">Rotacija (os Z)</label>
+                    <b-field>
+                        <b-field>
+                            <b-tooltip label="Stupnjevi" type="is-black">
+                                <b-input
+                                    v-model="rotation.z.d"
+                                    type="number"
+                                    @input="setRotation(2)"
+                                ></b-input>
+                            </b-tooltip>
+                            <p class="control">
+                                <span class="button is-static">°</span>
+                            </p>
+                        </b-field>
+                        <b-field>
+                            <b-tooltip label="Minute" type="is-black">
+                                <b-input
+                                    v-model="rotation.z.m"
+                                    name="minutes"
+                                    type="number"
+                                    @input="setRotation(2)"
+                                    v-validate="'numeric|min_value:0|max_value:59'"
+                                ></b-input>
+                            </b-tooltip>
+                            <p class="control">
+                                <span class="button is-static">'</span>
+                            </p>
+                        </b-field>
+                        <b-field>
+                            <b-tooltip label="Sekunde" type="is-black">
+                                <b-input
+                                    v-model="rotation.z.s"
+                                    name="seconds"
+                                    type="number"
+                                    @input="setRotation(2)"
+                                    v-validate="'numeric|min_value:0|max_value:59'"
+                                ></b-input>
+                            </b-tooltip>
+                            <p class="control">
+                                <span class="button is-static">"</span>
+                            </p>
+                        </b-field>
+                        <b-tooltip label="Resetiraj" type="is-black">
+                            <button class="button is-warning" @click="resetRotation(2)">
+                                <span class="icon">
+                                    <i class="fas fa-redo"></i>
+                                </span>
+                            </button>
+                        </b-tooltip>
+                    </b-field>
+                </div>
             </div>
         </div>
     </div>
@@ -218,10 +320,22 @@ export default {
     data() {
         return {
             isDrag: false,
+            isScale: false,
             hasCollisions: false,
             myAxis: false,
             axis: 0,
             mesh: null,
+            group: 0,
+            enter: {
+                x: true,
+                y: true,
+                z: true
+            },
+            size: {
+                x: 1,
+                y: 1,
+                z: 1
+            },
             rotation: {
                 x: {
                     d: 0,
@@ -242,6 +356,10 @@ export default {
         };
     },
     mounted() {
+        var obj = this.getMeshByName(this.mesh);
+        this.size.x = obj.scaling.x;
+        this.size.y = obj.scaling.y;
+        this.size.z = obj.scaling.z;
         setInterval(() => {
             this.setDMS(0);
             this.setDMS(1);
@@ -259,6 +377,9 @@ export default {
             this.$emit("unlockPlaying");
             this.switchDrag();
         }
+        if (this.isScale) {
+            this.switchScale(false);
+        }
         if (this.mesh) {
             babylon.toggleHighlight(this.getMeshByName(this.mesh));
         }
@@ -269,7 +390,9 @@ export default {
         }),
         ...mapState({
             existingMeshes: state => state.experiment.meshes,
-            meshAxis: state => state.experiment.meshAxis
+            meshAxis: state => state.experiment.meshAxis,
+            isPlaying: state => state.experiment.playing,
+            physicsImpostors: state => state.experiment.physicsImpostors
         }),
         hasAxis: {
             get: function() {
@@ -429,6 +552,38 @@ export default {
                 babylon.deleteMeshAxis(this.mesh);
             }
         },
+        switchGroup(value) {
+            if (value == 1) {
+                if (this.isScale) {
+                    this.switchScale(false);
+                    this.isScale = false;
+                }
+            }
+            this.group = value;
+        },
+        switchScale(value) {
+            if (value) {
+                var obj = this.getMeshByName(this.mesh);
+                this.physicsImpostor = {
+                    type: obj.physicsImpostor.type,
+                    mass: obj.physicsImpostor.mass,
+                    friction: obj.physicsImpostor.friction,
+                    restitution: obj.physicsImpostor.restitution
+                };
+            } else {
+                var obj = this.getMeshByName(this.mesh);
+                obj.physicsImpostor = new BABYLON.PhysicsImpostor(
+                    obj,
+                    this.physicsImpostor.type,
+                    {
+                        mass: this.physicsImpostor.mass,
+                        friction: this.physicsImpostor.friction,
+                        restitution: this.physicsImpostor.restitution
+                    },
+                    this.scene
+                );
+            }
+        },
         notification(msg) {
             this.$emit("notification", msg);
         },
@@ -443,6 +598,48 @@ export default {
         }
     },
     watch: {
+        "size.x": function() {
+            if (this.enter.x) {
+                this.enter.x = false;
+                return;
+            }
+            if (this.isPlaying) {
+                var obj = this.getMeshByName(this.mesh);
+                obj.scaling = new BABYLON.Vector3(
+                    this.size.x,
+                    this.size.y,
+                    this.size.z
+                );
+            }
+        },
+        "size.y": function() {
+            if (this.enter.y) {
+                this.enter.y = false;
+                return;
+            }
+            if (this.isPlaying) {
+                var obj = this.getMeshByName(this.mesh);
+                obj.scaling = new BABYLON.Vector3(
+                    this.size.x,
+                    this.size.y,
+                    this.size.z
+                );
+            }
+        },
+        "size.z": function() {
+            if (this.enter.z) {
+                this.enter.z = false;
+                return;
+            }
+            if (this.isPlaying) {
+                var obj = this.getMeshByName(this.mesh);
+                obj.scaling = new BABYLON.Vector3(
+                    this.size.x,
+                    this.size.y,
+                    this.size.z
+                );
+            }
+        },
         axis: function() {
             if (this.isDrag) {
                 babylon.addDragBehaviour(
@@ -462,6 +659,10 @@ export default {
                 }
             }
             if (newMesh) {
+                var obj = this.getMeshByName(newMesh);
+                this.size.x = obj.scaling.x;
+                this.size.y = obj.scaling.y;
+                this.size.z = obj.scaling.z;
                 babylon.toggleHighlight(this.getMeshByName(newMesh));
             }
         },

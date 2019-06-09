@@ -2,14 +2,14 @@ export default {
     create(properties, material, scene) {
         var sphere = BABYLON.MeshBuilder.CreateSphere(
             properties.name, {
-                diameterX: 2,
-                diameterY: 2,
-                diameterZ: 2
+                diameterX: 1,
+                diameterY: 1,
+                diameterZ: 1
             },
             scene
         );
         sphere.position.x = 0;
-        sphere.position.y = 0;
+        sphere.position.y = -0.5;
         sphere.position.z = 0;
         sphere.physicsImpostor = new BABYLON.PhysicsImpostor(
             sphere,

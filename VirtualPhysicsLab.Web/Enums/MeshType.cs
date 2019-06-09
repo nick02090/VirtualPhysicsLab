@@ -3,6 +3,7 @@
     public enum MeshType
     {
         Box = 2, 
-        Sphere = 1
+        Sphere = 1,
+        Cylinder = 7
     }
 }

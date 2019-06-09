@@ -253,6 +253,7 @@ export default {
                 }
             }
             await this.loadScene(this.experiment);
+            this.togglePlay(false);
             return;
         }
         if (this.isLoggedIn) {
@@ -343,7 +344,7 @@ export default {
                 this.currentPage++;
             }
         },
-        close() {
+        async close() {
             this.initScene();
             if (this.group == 1) {
                 var experiment = this.filteredExperiments[this.selected1];
@@ -354,7 +355,8 @@ export default {
                     window.location.pathname +
                     `?id=${experiment.id}`;
                 window.history.pushState({ path: newurl }, "", newurl);
-                this.loadScene(experiment);
+                await this.loadScene(experiment);
+                this.togglePlay(false);
             }
             this.firstOpen = false;
         },
@@ -382,7 +384,7 @@ export default {
             var canvas = document.getElementById("renderCanvas");
             this.engine = new BABYLON.Engine(canvas, true);
 
-            var scene = babylon.createEmptyScene(canvas, this.engine);
+            var scene = babylon.createEmptyScene(canvas, this.engine, 20);
             var color = colors.hexToColor3("#f5f1f2");
             scene.clearColor = new BABYLON.Color3(color[0], color[1], color[2]);
 

@@ -125,9 +125,9 @@ export default {
                 var time = (values[i].time - this.lifeTime) / 1000;
                 data.push({
                     Vrijeme: `${time.toFixed(2)} s`,
-                    PoložajX: `${values[i].velocity.x} m/s`,
-                    PoložajY: `${values[i].velocity.y} m/s`,
-                    PoložajZ: `${values[i].velocity.z} m/s`
+                    BrzinaX: `${values[i].velocity.x} m/s`,
+                    BrzinaY: `${values[i].velocity.y} m/s`,
+                    BrzinaZ: `${values[i].velocity.z} m/s`
                 });
             }
             this.excel.data = data;

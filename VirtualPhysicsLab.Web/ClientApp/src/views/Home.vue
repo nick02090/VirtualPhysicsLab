@@ -112,7 +112,8 @@
                         <article class="media">
                             <div class="media-left">
                                 <figure class="image is-64x64">
-                                    <img :src="user.image">
+                                    <img v-if="user.occupation == 0" src="@/assets/professor.png">
+                                    <img v-else src="@/assets/student.png">
                                 </figure>
                             </div>
                             <div class="media-content">
@@ -214,7 +215,13 @@
                         <article class="media">
                             <div class="media-left">
                                 <figure class="image is-64x64">
-                                    <img :src="experiment.image">
+                                    <img v-if="experiment.picture == 0" src="@/assets/black.png">
+                                    <img v-if="experiment.picture == 1" src="@/assets/blue.png">
+                                    <img v-if="experiment.picture == 2" src="@/assets/green.png">
+                                    <img v-if="experiment.picture == 3" src="@/assets/orange.png">
+                                    <img v-if="experiment.picture == 4" src="@/assets/pink.png">
+                                    <img v-if="experiment.picture == 5" src="@/assets/red.png">
+                                    <img v-if="experiment.picture == 6" src="@/assets/yellow.png">
                                 </figure>
                             </div>
                             <div class="media-content">

@@ -1,5 +1,15 @@
 <template>
     <div id="moj-pokus">
+        <b-field label="Slika">
+            <b-select v-model="picture" icon="palette">
+                <option
+                    v-for="option in pictures"
+                    :value="option.value"
+                    :key="option.value"
+                >{{ option.name }}</option>
+            </b-select>
+        </b-field>
+
         <b-field label="Naziv" :type="errors.has('title') ? 'is-danger' : ''">
             <b-input v-model="title" name="title" v-validate="'required'"></b-input>
         </b-field>
@@ -33,7 +43,38 @@ export default {
         return {
             title: "",
             description: "",
-            id: null
+            id: null,
+            picture: 0,
+            pictures: [
+                {
+                    value: 0,
+                    name: "Crna"
+                },
+                {
+                    value: 1,
+                    name: "Plava"
+                },
+                {
+                    value: 2,
+                    name: "Zelena"
+                },
+                {
+                    value: 3,
+                    name: "Narančasta"
+                },
+                {
+                    value: 4,
+                    name: "Ružičasta"
+                },
+                {
+                    value: 5,
+                    name: "Crvena"
+                },
+                {
+                    value: 6,
+                    name: "Žuta"
+                }
+            ]
         };
     },
     mounted() {
@@ -88,6 +129,7 @@ export default {
             var info = {
                 title: this.title,
                 description: this.description,
+                picture: this.picture,
                 createdBy: createdBy
             };
             await this.createExperiment(info);
@@ -113,6 +155,7 @@ export default {
                 title: this.title,
                 description: this.description,
                 createdBy: createdBy,
+                picture: this.picture,
                 id: this.id
             };
             await this.updateExperiment(info);

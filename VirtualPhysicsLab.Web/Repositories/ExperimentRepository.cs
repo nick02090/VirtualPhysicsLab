@@ -51,7 +51,8 @@ namespace VirtualPhysicsLab.Web.Repositories
                     Description = x.Description,
                     LogicalName = x.LogicalName,
                     Name = x.Name,
-                    Title = x.Title
+                    Title = x.Title,
+                    Picture = x.Picture
                 }).ToArrayAsync();
         }
 
@@ -71,7 +72,8 @@ namespace VirtualPhysicsLab.Web.Repositories
                     Id = x.Id,
                     LogicalName = x.LogicalName,
                     Name = x.Name,
-                    Title = x.Title
+                    Title = x.Title,
+                    Picture = x.Picture
                 }).SingleOrDefaultAsync(x => x.Id == id);
         }
 
@@ -101,7 +103,8 @@ namespace VirtualPhysicsLab.Web.Repositories
                     Id = x.Id,
                     LogicalName = x.LogicalName,
                     Name = x.Name,
-                    Title = x.Title
+                    Title = x.Title,
+                    Picture = x.Picture
                 }).ToArrayAsync();
         }
 
@@ -116,6 +119,7 @@ namespace VirtualPhysicsLab.Web.Repositories
             experiment.Description = entity.Description;
             experiment.Title = entity.Title;
             experiment.Name = entity.Title;
+            experiment.Picture = entity.Picture;
 
             VPLContext.Entry(experiment).State = EntityState.Modified;
 

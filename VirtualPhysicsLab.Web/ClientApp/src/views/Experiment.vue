@@ -135,7 +135,13 @@
                         <article class="media">
                             <div class="media-left">
                                 <figure class="image is-64x64">
-                                    <img :src="experiment.image">
+                                    <img v-if="experiment.picture == 0" src="@/assets/black.png">
+                                    <img v-if="experiment.picture == 1" src="@/assets/blue.png">
+                                    <img v-if="experiment.picture == 2" src="@/assets/green.png">
+                                    <img v-if="experiment.picture == 3" src="@/assets/orange.png">
+                                    <img v-if="experiment.picture == 4" src="@/assets/pink.png">
+                                    <img v-if="experiment.picture == 5" src="@/assets/red.png">
+                                    <img v-if="experiment.picture == 6" src="@/assets/yellow.png">
                                 </figure>
                             </div>
                             <div class="media-content">
@@ -355,6 +361,7 @@ export default {
                     window.location.pathname +
                     `?id=${experiment.id}`;
                 window.history.pushState({ path: newurl }, "", newurl);
+                this.$store.commit("experiment/SET_EXPERIMENT", experiment);
                 await this.loadScene(experiment);
                 this.togglePlay(false);
             }

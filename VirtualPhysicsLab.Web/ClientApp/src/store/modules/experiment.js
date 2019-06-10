@@ -359,6 +359,7 @@ const actions = {
                 commit(types.SET_LOADING, true);
 
                 var experiment = {
+                    picture: experimentInfo.picture,
                     title: experimentInfo.title,
                     description: experimentInfo.description,
                     createdById: experimentInfo.createdBy.id,
@@ -367,6 +368,7 @@ const actions = {
 
                 var experimentId = await experimentApi.createExperiment(experiment);
                 let newExperiment = {
+                    picture: experimentInfo.picture,
                     id: experimentId,
                     title: experimentInfo.title,
                     description: experimentInfo.description,
@@ -466,6 +468,7 @@ const actions = {
                 commit(types.SET_LOADING, true);
 
                 var experiment = {
+                    picture: experimentInfo.picture,
                     title: experimentInfo.title,
                     description: experimentInfo.description,
                     createdBy: experimentInfo.createdBy,
@@ -474,6 +477,7 @@ const actions = {
 
                 await experimentApi.updateExperiment(experiment);
                 let newExperiment = {
+                    picture: experimentInfo.picture,
                     id: experimentInfo.id,
                     title: experimentInfo.title,
                     description: experimentInfo.description,

@@ -221,6 +221,7 @@ export default {
             );
             obj.rotationQuaternion = quaternion;
             obj.scaling = new BABYLON.Vector3(mesh.settings.size.x, mesh.settings.size.y, mesh.settings.size.z);
+            obj.physicsImpostor.setLinearVelocity(new BABYLON.Vector3(parseFloat(mesh.settings.velocity.x), parseFloat(mesh.settings.velocity.y), parseFloat(mesh.settings.velocity.z)));
 
             var meshLog = {
                 mesh: mesh.name,

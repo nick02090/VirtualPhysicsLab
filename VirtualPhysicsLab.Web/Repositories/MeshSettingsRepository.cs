@@ -53,6 +53,7 @@ namespace VirtualPhysicsLab.Web.Repositories
                 .Include(x => x.Position)
                 .Include(x => x.Rotation)
                 .Include(x => x.Size)
+                .Include(x => x.Velocity)
                 .Where(x => x.MeshId == meshId).SingleOrDefaultAsync();
         }
 

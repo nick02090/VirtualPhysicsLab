@@ -68,7 +68,8 @@ namespace VirtualPhysicsLab.Web.Repositories
                         Mass = x.Settings.Mass,
                         Restitution = x.Settings.Restitution,
                         Rotation = x.Settings.Rotation,
-                        Size = x.Settings.Size
+                        Size = x.Settings.Size,
+                        Velocity = x.Settings.Velocity
                     },
                     Type = x.Type
                 }).ToArrayAsync();

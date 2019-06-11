@@ -28,6 +28,7 @@ namespace VirtualPhysicsLab.Web.Services
             newMeshSettings.Position = entity.Position;
             newMeshSettings.Rotation = entity.Rotation;
             newMeshSettings.Size = entity.Size;
+            newMeshSettings.Velocity = entity.Velocity;
 
             var experimentSettings = await MeshSettingsRepository.UpdateAsync(newMeshSettings);
 

@@ -17,6 +17,7 @@ namespace VirtualPhysicsLab.Web.Data
         public DbSet<Rotation> Rotations { get; set; }
         public DbSet<Size> Sizes { get; set; }
         public DbSet<Color> Colors { get; set; }
+        public DbSet<Velocity> Velocities { get; set; }
 
         public VPLContext(DbContextOptions<VPLContext> options) : base(options)
         {
@@ -68,6 +69,11 @@ namespace VirtualPhysicsLab.Web.Data
                  .HasOne(m => m.Size)
                  .WithOne(s => s.MeshSettings)
                  .HasForeignKey<Size>(s => s.MeshSettingsId);
+
+            modelBuilder.Entity<MeshSettings>()
+                .HasOne(m => m.Velocity)
+                .WithOne(v => v.MeshSettings)
+                .HasForeignKey<Velocity>(v => v.MeshSettingsId);
             #endregion
 
             #region Mesh-MeshSettings

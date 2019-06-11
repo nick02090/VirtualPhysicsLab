@@ -387,11 +387,20 @@ const actions = {
                 await experimentApi.createSettings(settings);
 
                 var meshes = state.meshes;
+                var experimentMeshes = [];
 
                 for (var i in meshes) {
                     var name = meshes[i];
                     var obj = state.scene.getMeshByName(name);
-                    var type = obj.physicsImpostor.type;
+                    var physicsImpostor = null;
+                    var trueImpostor = true;
+                    if (obj.physicsImpostor.isDisposed) {
+                        trueImpostor = false;
+                        physicsImpostor = state.physicsImpostors.find(x => x.name == name)
+                    } else {
+                        physicsImpostor = obj.physicsImpostor;
+                    }
+                    var type = physicsImpostor.type;
                     var mesh = {
                         name: name,
                         experiment: {
@@ -405,12 +414,13 @@ const actions = {
                     var size = obj.scaling;
                     var position = obj.position;
                     var rotation = obj.rotationQuaternion.toEulerAngles();
-                    var mass = obj.physicsImpostor.mass;
-                    var friction = obj.physicsImpostor.friction;
-                    var restitution = obj.physicsImpostor.restitution;
+                    var mass = physicsImpostor.mass;
+                    var friction = physicsImpostor.friction;
+                    var restitution = physicsImpostor.restitution;
                     var pi = Math.PI;
                     var color = obj.material.diffuseColor;
                     var axis = false;
+                    var velocity = trueImpostor ? physicsImpostor.getLinearVelocity() : physicsImpostor.velocity;
                     if (state.meshAxis.length > 0) {
                         var found = state.meshAxis.find(x => x.mesh === name);
                         if (found) {
@@ -443,11 +453,23 @@ const actions = {
                             g: color.g,
                             b: color.b
                         },
+                        velocity: {
+                            x: velocity.x,
+                            y: velocity.y,
+                            z: velocity.z,
+                        },
                         meshId: meshId
                     }
 
                     await meshApi.createSettings(settings);
+
+                    experimentMeshes.push({
+                        ...mesh,
+                        settings: settings
+                    })
                 }
+
+                commit(types.SET_EXPERIMENT_MESHES, experimentMeshes);
 
                 resolve();
             } catch (e) {
@@ -496,11 +518,20 @@ const actions = {
                 await experimentApi.updateSettings(settings);
 
                 var meshes = state.meshes;
+                var experimentMeshes = [];
 
                 for (var i in meshes) {
                     var name = meshes[i];
                     var obj = state.scene.getMeshByName(name);
-                    var type = obj.physicsImpostor.type;
+                    var physicsImpostor = null;
+                    var trueImpostor = true;
+                    if (obj.physicsImpostor.isDisposed) {
+                        trueImpostor = false;
+                        physicsImpostor = state.physicsImpostors.find(x => x.name == name)
+                    } else {
+                        physicsImpostor = obj.physicsImpostor;
+                    }
+                    var type = physicsImpostor.type;
                     var mesh = {
                         name: name,
                         experiment: {
@@ -533,12 +564,13 @@ const actions = {
                     var size = obj.scaling;
                     var position = obj.position;
                     var rotation = obj.rotationQuaternion.toEulerAngles();
-                    var mass = obj.physicsImpostor.mass;
-                    var friction = obj.physicsImpostor.friction;
-                    var restitution = obj.physicsImpostor.restitution;
+                    var mass = physicsImpostor.mass;
+                    var friction = physicsImpostor.friction;
+                    var restitution = physicsImpostor.restitution;
                     var pi = Math.PI;
                     var color = obj.material.diffuseColor;
                     var axis = false;
+                    var velocity = trueImpostor ? physicsImpostor.getLinearVelocity() : physicsImpostor.velocity;
                     if (state.meshAxis.length > 0) {
                         var found = state.meshAxis.find(x => x.mesh === name);
                         if (found) {
@@ -571,6 +603,11 @@ const actions = {
                             g: color.g,
                             b: color.b
                         },
+                        velocity: {
+                            x: velocity.x,
+                            y: velocity.y,
+                            z: velocity.z
+                        },
                         meshId: meshId
                     }
 
@@ -583,6 +620,11 @@ const actions = {
                     } else {
                         await meshApi.createSettings(settings);
                     }
+
+                    experimentMeshes.push({
+                        ...mesh,
+                        settings: settings
+                    })
                 }
 
                 var previousMeshes = state.experimentMeshes;
@@ -593,6 +635,8 @@ const actions = {
                         await meshApi.deleteMesh(previousMesh.id);
                     }
                 }
+
+                commit(types.SET_EXPERIMENT_MESHES, experimentMeshes);
 
                 resolve();
             } catch (e) {

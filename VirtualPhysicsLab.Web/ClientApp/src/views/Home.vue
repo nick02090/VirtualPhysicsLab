@@ -85,7 +85,7 @@
                 </div>
             </div>
         </section>
-        <section class="hero is-light is-bold">
+        <section class="hero is-light is-bold" v-if="isLoggedIn">
             <div class="hero-body">
                 <div class="control is-flex">
                     <h1 class="title is-4">Korisnici</h1>
@@ -186,8 +186,8 @@
                 </div>
             </div>
         </section>
-        <hr>
-        <section class="hero is-light is-bold">
+        <hr v-if="isLoggedIn">
+        <section class="hero is-light is-bold" v-if="isLoggedIn">
             <div class="hero-body">
                 <div class="control is-flex">
                     <h1 class="title is-4">Pokusi</h1>
@@ -323,16 +323,18 @@ export default {
     },
     mixins: [Occupation],
     async mounted() {
-        await this.getExperimentsAsync();
-        await this.getUsersAsync();
-        this.users = this.getUsers;
-        this.userSearch.pages = Math.ceil(
-            this.users.length / this.userSearch.batchSize
-        );
-        this.experiments = this.getExperiments;
-        this.experimentSearch.pages = Math.ceil(
-            this.experiments.length / this.experimentSearch.batchSize
-        );
+        if (this.isLoggedIn) {
+            await this.getExperimentsAsync();
+            await this.getUsersAsync();
+            this.users = this.getUsers;
+            this.userSearch.pages = Math.ceil(
+                this.users.length / this.userSearch.batchSize
+            );
+            this.experiments = this.getExperiments;
+            this.experimentSearch.pages = Math.ceil(
+                this.experiments.length / this.experimentSearch.batchSize
+            );
+        }
     },
     computed: {
         ...mapGetters({

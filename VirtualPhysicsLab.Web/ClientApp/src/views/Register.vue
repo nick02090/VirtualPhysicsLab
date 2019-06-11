@@ -94,7 +94,9 @@
                         </div>
                         <hr>
                         <p style="text-align: left">
-                            <small style="color: red">* Sva polja su obavezna.</small>
+                            <small style="color: red">* Sva su polja obavezna.</small>
+                            <br>
+                            <small style="color: red">* Lozinka mora sadržavati barem 8 znakova.</small>
                         </p>
                     </div>
                     <div class="tile is-child has-text-centered">

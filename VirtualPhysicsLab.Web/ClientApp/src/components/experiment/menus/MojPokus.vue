@@ -83,6 +83,7 @@ export default {
         if (this.id) {
             this.title = this.experiment.title;
             this.description = this.experiment.description;
+            this.picture = this.experiment.picture;
         }
     },
     computed: {

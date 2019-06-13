@@ -352,7 +352,8 @@ export default {
                     m: 0,
                     s: 0
                 }
-            }
+            },
+            physicsImpostor: null
         };
     },
     mounted() {

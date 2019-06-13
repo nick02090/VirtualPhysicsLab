@@ -44,6 +44,8 @@ namespace VirtualPhysicsLab.Web.Services
             newExperimentSettings.Friction = entity.Friction;
             newExperimentSettings.Restitution = entity.Restitution;
             newExperimentSettings.Walls = entity.Walls;
+            newExperimentSettings.Gravity = entity.Gravity;
+            newExperimentSettings.Size = entity.Size;
 
             var experimentSettings = await ExperimentSettingsRepository.UpdateAsync(newExperimentSettings);
 

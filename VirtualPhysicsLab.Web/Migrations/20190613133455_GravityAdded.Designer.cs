@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtualPhysicsLab.Web.Data;
 
 namespace VirtualPhysicsLab.Web.Migrations
 {
     [DbContext(typeof(VPLContext))]
-    partial class VPLContextModelSnapshot : ModelSnapshot
+    [Migration("20190613133455_GravityAdded")]
+    partial class GravityAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -303,33 +305,6 @@ namespace VirtualPhysicsLab.Web.Migrations
                     b.ToTable("Rotations");
                 });
 
-            modelBuilder.Entity("VirtualPhysicsLab.Web.Models.SceneSize", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime>("CreatedOn");
-
-                    b.Property<Guid>("ExperimentSettingsId");
-
-                    b.Property<string>("LogicalName");
-
-                    b.Property<string>("Name");
-
-                    b.Property<float>("X");
-
-                    b.Property<float>("Y");
-
-                    b.Property<float>("Z");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExperimentSettingsId")
-                        .IsUnique();
-
-                    b.ToTable("SceneSizes");
-                });
-
             modelBuilder.Entity("VirtualPhysicsLab.Web.Models.Size", b =>
                 {
                     b.Property<Guid>("Id")
@@ -458,14 +433,6 @@ namespace VirtualPhysicsLab.Web.Migrations
                     b.HasOne("VirtualPhysicsLab.Data.Models.MeshSettings", "MeshSettings")
                         .WithOne("Rotation")
                         .HasForeignKey("VirtualPhysicsLab.Web.Models.Rotation", "MeshSettingsId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("VirtualPhysicsLab.Web.Models.SceneSize", b =>
-                {
-                    b.HasOne("VirtualPhysicsLab.Web.Models.ExperimentSettings", "ExperimentSettings")
-                        .WithOne("Size")
-                        .HasForeignKey("VirtualPhysicsLab.Web.Models.SceneSize", "ExperimentSettingsId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

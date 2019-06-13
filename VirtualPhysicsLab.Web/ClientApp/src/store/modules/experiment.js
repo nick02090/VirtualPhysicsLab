@@ -41,6 +41,8 @@ const types = {
     SET_PLAYING: "SET_PLAYING",
     SET_MESH_IMPOSTORS: "SET_MESH_IMPOSTORS",
     UPDATE_MESH_IMPOSTORS: "UPDATE_MESH_IMPOSTORS",
+    SET_GRAVITY: "SET_GRAVITY",
+    SET_GRAVITY_AXIS: "SET_GRAVITY_AXIS",
 
     SET_PHYSICS_IMPOSTOR: "SET_PHYSICS_IMPOSTOR",
     SET_DRAG_BEHAVIOUR: "SET_DRAG_BEHAVIOUR",
@@ -77,6 +79,8 @@ const state = {
     canvas: null,
     playing: true,
     physicsImpostors: [],
+    gravity: null,
+    gravityAxis: null,
 
     dragBehaviour: [],
     physicsImpostor: null,
@@ -133,6 +137,12 @@ const mutations = {
     },
     [types.UPDATE_MESH_IMPOSTORS](state, data) {
         state.physicsImpostors.push(data);
+    },
+    [types.SET_GRAVITY](state, data) {
+        state.gravity = data;
+    },
+    [types.SET_GRAVITY_AXIS](state, data) {
+        state.gravityAxis = data;
     },
 
     [types.SET_PHYSICS_IMPOSTOR](state, data) {
@@ -263,71 +273,72 @@ const actions = {
         rootState
     }) {
         let scene = state.scene;
+        let ground = state.ground;
 
         var northWall = new BABYLON.MeshBuilder.CreateGround("northWall", {
-            width: 20,
-            height: 20
+            width: 20 * ground.scaling.x,
+            height: 20 * ground.scaling.z
         }, scene);
-        northWall.position.z = 10;
+        northWall.position.z = 10 * ground.scaling.z;
         northWall.position.y = 9;
         northWall.rotation.x = -Math.PI / 2;
         northWall.physicsImpostor = new BABYLON.PhysicsImpostor(
             northWall,
             BABYLON.PhysicsImpostor.BoxImpostor, {
                 mass: 0,
-                friction: 0.1,
-                restitution: 0.9
+                friction: ground.physicsImpostor.friction,
+                restitution: ground.physicsImpostor.restitution
             },
             scene);
         northWall.visibility = false;
 
         var westWall = new BABYLON.MeshBuilder.CreateGround("westWall", {
-            width: 20,
-            height: 20
+            width: 20 * ground.scaling.x,
+            height: 20 * ground.scaling.z
         }, scene);
-        westWall.position.x = -10;
+        westWall.position.x = -10 * ground.scaling.x;
         westWall.position.y = 9;
         westWall.rotation.z = -Math.PI / 2;
         westWall.physicsImpostor = new BABYLON.PhysicsImpostor(
             westWall,
             BABYLON.PhysicsImpostor.BoxImpostor, {
                 mass: 0,
-                friction: 0.1,
-                restitution: 0.9
+                friction: ground.physicsImpostor.friction,
+                restitution: ground.physicsImpostor.restitution
             },
             scene);
         westWall.visibility = false;
 
         var eastWall = new BABYLON.MeshBuilder.CreateGround("eastWall", {
-            width: 20,
-            height: 20
+            width: 20 * ground.scaling.x,
+            height: 20 * ground.scaling.z
         }, scene);
-        eastWall.position.x = 10;
+        eastWall.position.x = 10 * ground.scaling.x;
         eastWall.position.y = 9;
         eastWall.rotation.z = Math.PI / 2;
         eastWall.physicsImpostor = new BABYLON.PhysicsImpostor(
             eastWall,
             BABYLON.PhysicsImpostor.BoxImpostor, {
                 mass: 0,
-                friction: 0.1,
-                restitution: 0.9
+                friction: ground.physicsImpostor.friction,
+                restitution: ground.physicsImpostor.restitution
             },
             scene);
         eastWall.visibility = false;
 
         var southWall = new BABYLON.MeshBuilder.CreateGround("southWall", {
-            width: 20,
-            height: 20
+            width: 20 * ground.scaling.x,
+            height: 20 * ground.scaling.z
         }, scene);
-        southWall.position.z = -10;
+        southWall.position.z = -10 * ground.scaling.z;
         southWall.position.y = 9;
         southWall.rotation.x = Math.PI / 2;
         southWall.physicsImpostor = new BABYLON.PhysicsImpostor(
             southWall,
             BABYLON.PhysicsImpostor.BoxImpostor, {
                 mass: 0,
-                friction: 0.1,
-                restitution: 0.9
+                friction: ground.physicsImpostor.friction,
+                restitution: ground.physicsImpostor.restitution
             },
             scene);
         southWall.visibility = false;
@@ -381,6 +392,17 @@ const actions = {
                     restitution: state.ground.physicsImpostor.restitution,
                     walls: state.walls.length > 0,
                     axis: state.axis.length > 0,
+                    gravity: {
+                        axis: state.gravityAxis,
+                        x: state.gravity.x,
+                        y: state.gravity.y,
+                        z: state.gravity.z
+                    },
+                    size: {
+                        x: state.ground.scaling.x,
+                        y: state.ground.scaling.y,
+                        z: state.ground.scaling.z,
+                    },
                     experimentId: experimentId
                 }
 
@@ -512,6 +534,17 @@ const actions = {
                     restitution: state.ground.physicsImpostor.restitution,
                     walls: state.walls.length > 0,
                     axis: state.axis.length > 0,
+                    gravity: {
+                        axis: state.gravityAxis,
+                        x: state.gravity.x,
+                        y: state.gravity.y,
+                        z: state.gravity.z
+                    },
+                    size: {
+                        x: state.ground.scaling.x,
+                        y: state.ground.scaling.y,
+                        z: state.ground.scaling.z,
+                    },
                     experimentId: experimentInfo.id
                 }
 

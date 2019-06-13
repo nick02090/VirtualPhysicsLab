@@ -18,6 +18,8 @@ namespace VirtualPhysicsLab.Web.Data
         public DbSet<Size> Sizes { get; set; }
         public DbSet<Color> Colors { get; set; }
         public DbSet<Velocity> Velocities { get; set; }
+        public DbSet<Gravity> Gravities { get; set; }
+        public DbSet<SceneSize> SceneSizes { get; set; }
 
         public VPLContext(DbContextOptions<VPLContext> options) : base(options)
         {
@@ -74,6 +76,18 @@ namespace VirtualPhysicsLab.Web.Data
                 .HasOne(m => m.Velocity)
                 .WithOne(v => v.MeshSettings)
                 .HasForeignKey<Velocity>(v => v.MeshSettingsId);
+            #endregion
+
+            #region ExperimentSettings-Vector3
+            modelBuilder.Entity<ExperimentSettings>()
+                .HasOne(e => e.Gravity)
+                .WithOne(g => g.ExperimentSettings)
+                .HasForeignKey<Gravity>(g => g.ExperimentSettingsId);
+
+            modelBuilder.Entity<ExperimentSettings>()
+                .HasOne(e => e.Size)
+                .WithOne(s => s.ExperimentSettings)
+                .HasForeignKey<SceneSize>(s => s.ExperimentSettingsId);
             #endregion
 
             #region Mesh-MeshSettings

@@ -53,6 +53,29 @@ export default {
             store.commit("experiment/SET_MESH_IMPOSTORS", physicsImpostors);
         } else {
             var scene = store.state.experiment.scene;
+            var ground = store.state.experiment.ground;
+            var groundImpostor = {
+                mass: ground.physicsImpostor.mass,
+                type: ground.physicsImpostor.type,
+                friction: ground.physicsImpostor.friction,
+                restitution: ground.physicsImpostor.restitution
+            };
+            store.dispatch("experiment/deleteWalls");
+            scene.disablePhysicsEngine();
+            var gravityVector = store.state.experiment.gravity;
+            var physicsPlugin = new BABYLON.CannonJSPlugin();
+            scene.enablePhysics(gravityVector, physicsPlugin);
+            ground.physicsImpostor = new BABYLON.PhysicsImpostor(
+                ground,
+                groundImpostor.type, {
+                    mass: groundImpostor.mass,
+                    friction: groundImpostor.friction,
+                    restitution: groundImpostor.restitution
+                },
+                scene
+            );
+            store.commit("experiment/SET_GROUND", ground);
+            store.dispatch("experiment/createWalls");
             var physicsImpostors = store.state.experiment.physicsImpostors;
             for (var i in physicsImpostors) {
                 var obj = store.getters["experiment/getMeshByName"](physicsImpostors[i].name);
@@ -240,14 +263,23 @@ export default {
             store.commit("experiment/SET_MESH_LOGS", meshLog);
         }
 
+        store.dispatch("experiment/deleteWalls");
+        store.state.experiment.ground.scaling = new BABYLON.Vector3(parseFloat(experiment.settings.size.x), parseFloat(experiment.settings.size.y), parseFloat(experiment.settings.size.z))
+        store.state.experiment.ground.physicsImpostor.friction = experiment.settings.friction;
+        store.state.experiment.ground.physicsImpostor.restitution = experiment.settings.restitution;
+        store.dispatch("experiment/createWalls");
+
+        var gravity = experiment.settings.gravity;
+        store.commit("experiment/SET_GRAVITY_AXIS", gravity.axis);
+        var gravityVector = new BABYLON.Vector3(gravity.x, gravity.y, gravity.z)
+        store.commit("experiment/SET_GRAVITY", gravityVector);
+
         if (experiment.settings.axis === false) {
             this.removeAxis();
         }
         if (experiment.settings.walls === false) {
             store.dispatch("experiment/deleteWalls");
         }
-        store.state.experiment.ground.physicsImpostor.friction = experiment.settings.friction;
-        store.state.experiment.ground.physicsImpostor.restitution = experiment.settings.restitution;
     },
     createEmptyScene(canvas, engine, polygon) {
         var scene = new BABYLON.Scene(engine);
@@ -285,6 +317,9 @@ export default {
         var gravityVector = new BABYLON.Vector3(0, -9.81, 0);
         var physicsPlugin = new BABYLON.CannonJSPlugin();
         scene.enablePhysics(gravityVector, physicsPlugin);
+
+        store.commit("experiment/SET_GRAVITY", gravityVector);
+        store.commit("experiment/SET_GRAVITY_AXIS", 1);
 
         var ground = new BABYLON.MeshBuilder.CreateBox("ground", {
             width: polygon,

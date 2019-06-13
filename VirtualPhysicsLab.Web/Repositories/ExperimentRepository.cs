@@ -7,6 +7,7 @@ using VirtualPhysicsLab.Data.Models;
 using VirtualPhysicsLab.Data.Repositories;
 using VirtualPhysicsLab.Web.Data;
 using VirtualPhysicsLab.Web.Interfaces;
+using VirtualPhysicsLab.Web.Models;
 
 namespace VirtualPhysicsLab.Web.Repositories
 {
@@ -66,7 +67,18 @@ namespace VirtualPhysicsLab.Web.Repositories
                     {
                         Id = x.CreatedBy.Id
                     },
-                    Settings = x.Settings,
+                    Settings = new ExperimentSettings
+                    {
+                        Gravity = x.Settings.Gravity,
+                        Axis = x.Settings.Axis,
+                        Friction = x.Settings.Friction,
+                        Restitution = x.Settings.Restitution,
+                        Walls = x.Settings.Walls,
+                        Id = x.Settings.Id,
+                        CreatedOn = x.Settings.CreatedOn,
+                        LogicalName = x.Settings.LogicalName,
+                        Size = x.Settings.Size
+                    },
                     CreatedOn = x.CreatedOn,
                     Description = x.Description,
                     Id = x.Id,
@@ -97,7 +109,18 @@ namespace VirtualPhysicsLab.Web.Repositories
                     {
                         Id = x.CreatedBy.Id
                     },
-                    Settings = x.Settings,
+                    Settings = new ExperimentSettings
+                    {
+                        Gravity = x.Settings.Gravity,
+                        Axis = x.Settings.Axis,
+                        Friction = x.Settings.Friction,
+                        Restitution = x.Settings.Restitution,
+                        Walls = x.Settings.Walls,
+                        Id = x.Settings.Id,
+                        CreatedOn = x.Settings.CreatedOn,
+                        LogicalName = x.Settings.LogicalName,
+                        Size = x.Settings.Size
+                    },
                     CreatedOn = x.CreatedOn,
                     Description = x.Description,
                     Id = x.Id,

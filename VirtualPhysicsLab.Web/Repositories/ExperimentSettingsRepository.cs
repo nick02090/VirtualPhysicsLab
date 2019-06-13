@@ -47,7 +47,11 @@ namespace VirtualPhysicsLab.Web.Repositories
 
         public async Task<ExperimentSettings> GetByExperimentAsync(Guid experimentId)
         {
-            return await VPLContext.ExperimentSettings.Include(x => x.Experiment).Where(x => x.ExperimentId == experimentId).SingleOrDefaultAsync();
+            return await VPLContext.ExperimentSettings
+                .Include(x => x.Experiment)
+                .Include(x => x.Gravity)
+                .Include(x => x.Size)
+                .Where(x => x.ExperimentId == experimentId).SingleOrDefaultAsync();
         }
 
         public async Task<ExperimentSettings> UpdateAsync(ExperimentSettings entity)

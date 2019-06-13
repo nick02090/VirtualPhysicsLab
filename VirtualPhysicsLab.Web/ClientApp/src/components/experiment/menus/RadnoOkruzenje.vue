@@ -19,7 +19,7 @@
             </div>
             <div class="control margin-left">
                 <b-tooltip type="is-black" label="Postavi/Izbriši zidove radnog okruženja.">
-                    <b-switch v-model="hasWalls" @input="switchWalls"></b-switch>
+                    <b-switch v-model="hasWalls" @input="switchWalls" :disabled="isScale"></b-switch>
                 </b-tooltip>
             </div>
         </div>
@@ -90,6 +90,67 @@
                 <b-icon icon="expand-arrows-alt" class="margin-5px"></b-icon>
             </b-field>
         </div>
+        <div class="control is-flex">
+            <div class="control margin-right">
+                <label class="label">Gravitacijska sila</label>
+            </div>
+            <div class="control margin-left" style="text-align: right">
+                <div class="block">
+                    <b-radio v-model="gravityAxis" :native-value="0" :disabled="isPlaying">x</b-radio>
+                    <b-radio v-model="gravityAxis" :native-value="1" :disabled="isPlaying">y</b-radio>
+                    <b-radio v-model="gravityAxis" :native-value="2" :disabled="isPlaying">z</b-radio>
+                </div>
+            </div>
+        </div>
+        <b-field>
+            <b-numberinput
+                :step="0.01"
+                v-model="gravity"
+                controls-position="compact"
+                controls-rounded
+                type="is-success"
+                :disabled="isPlaying"
+            ></b-numberinput>
+            <b-icon icon="apple-alt" class="margin-5px"></b-icon>
+        </b-field>
+        <div class="control is-flex">
+            <div class="control margin-right">
+                <label class="label">Veličina</label>
+            </div>
+            <div class="control margin-left">
+                <b-tooltip type="is-black" label="Uključi/Isključi podešavanje veličine podloge.">
+                    <b-switch v-model="isScale" @input="switchScale" :disabled="!isPlaying"></b-switch>
+                </b-tooltip>
+            </div>
+        </div>
+        <b-field horizontal label="x-os">
+            <b-numberinput
+                :step="0.1"
+                v-model="size.x"
+                :min="1"
+                :max="5"
+                controls-position="compact"
+                controls-rounded
+                type="is-success"
+                :editable="false"
+                expanded
+                :disabled="!isScale"
+            ></b-numberinput>
+        </b-field>
+        <b-field horizontal label="z-os">
+            <b-numberinput
+                :step="0.1"
+                v-model="size.z"
+                :min="1"
+                :max="5"
+                controls-position="compact"
+                controls-rounded
+                type="is-success"
+                :editable="false"
+                expanded
+                :disabled="!isScale"
+            ></b-numberinput>
+        </b-field>
     </div>
 </template>
 
@@ -102,15 +163,51 @@ export default {
     data() {
         return {
             axis: true,
-            walls: true
+            walls: true,
+            gravity: -9.81,
+            gravityAxis: 1,
+            size: {
+                x: 1,
+                y: 1,
+                z: 1
+            },
+            enter: {
+                x: true,
+                y: true,
+                z: true
+            },
+            isScale: false,
+            physicsImpostor: null
         };
+    },
+    mounted() {
+        this.gravityAxis = this.storeGravityAxis;
+        if (this.gravityAxis == 0) {
+            this.gravity = this.storeGravity.x;
+        } else if (this.gravityAxis == 1) {
+            this.gravity = this.storeGravity.y;
+        } else {
+            this.gravity = this.storeGravity.z;
+        }
+        var ground = this.ground;
+        this.size.x = ground.scaling.x;
+        this.size.y = ground.scaling.y;
+        this.size.z = ground.scaling.z;
+    },
+    beforeDestroy() {
+        if (this.isScale) {
+            this.switchScale(false);
+        }
     },
     computed: {
         ...mapState({
             currentAxis: state => state.experiment.axis,
             currentWalls: state => state.experiment.walls,
             ground: state => state.experiment.ground,
-            camera: state => state.experiment.camera
+            camera: state => state.experiment.camera,
+            isPlaying: state => state.experiment.playing,
+            storeGravity: state => state.experiment.gravity,
+            storeGravityAxis: state => state.experiment.gravityAxis
         }),
         hasAxis: {
             get: function() {
@@ -140,6 +237,8 @@ export default {
             },
             set: function(value) {
                 this.ground.physicsImpostor.friction = value;
+                this.deleteWalls();
+                this.createWalls();
             }
         },
         restitution: {
@@ -148,6 +247,8 @@ export default {
             },
             set: function(value) {
                 this.ground.physicsImpostor.restitution = value;
+                this.deleteWalls();
+                this.createWalls();
             }
         },
         scene: {
@@ -178,6 +279,40 @@ export default {
                 this.deleteWalls();
             }
         },
+        changeGravity() {
+            var gravityVector = new BABYLON.Vector3(
+                this.gravityAxis == 0 ? this.gravity : 0,
+                this.gravityAxis == 1 ? this.gravity : 0,
+                this.gravityAxis == 2 ? this.gravity : 0
+            );
+            this.$store.commit("experiment/SET_GRAVITY", gravityVector);
+            this.$store.commit("experiment/SET_GRAVITY_AXIS", this.gravityAxis);
+        },
+        switchScale(value) {
+            if (value) {
+                var ground = this.ground;
+                this.physicsImpostor = {
+                    type: ground.physicsImpostor.type,
+                    mass: ground.physicsImpostor.mass,
+                    friction: ground.physicsImpostor.friction,
+                    restitution: ground.physicsImpostor.restitution
+                };
+                this.deleteWalls();
+            } else {
+                var ground = this.ground;
+                ground.physicsImpostor = new BABYLON.PhysicsImpostor(
+                    ground,
+                    this.physicsImpostor.type,
+                    {
+                        mass: this.physicsImpostor.mass,
+                        friction: this.physicsImpostor.friction,
+                        restitution: this.physicsImpostor.restitution
+                    },
+                    this.scene
+                );
+                this.createWalls();
+            }
+        },
         cameraView(view) {
             switch (view) {
                 case "down":
@@ -194,6 +329,44 @@ export default {
                     break;
                 default:
                     break;
+            }
+        }
+    },
+    watch: {
+        gravity() {
+            this.changeGravity();
+        },
+        gravityAxis() {
+            this.changeGravity();
+        },
+        "size.x"(newSize, previousSize) {
+            if (this.enter.x) {
+                this.enter.x = false;
+                return;
+            }
+            if (previousSize == newSize) return;
+            if (this.isPlaying) {
+                var ground = this.ground;
+                ground.scaling = new BABYLON.Vector3(
+                    this.size.x,
+                    this.size.y,
+                    this.size.z
+                );
+            }
+        },
+        "size.z"(newSize, previousSize) {
+            if (this.enter.z) {
+                this.enter.z = false;
+                return;
+            }
+            if (previousSize == newSize) return;
+            if (this.isPlaying) {
+                var ground = this.ground;
+                ground.scaling = new BABYLON.Vector3(
+                    this.size.x,
+                    this.size.y,
+                    this.size.z
+                );
             }
         }
     }

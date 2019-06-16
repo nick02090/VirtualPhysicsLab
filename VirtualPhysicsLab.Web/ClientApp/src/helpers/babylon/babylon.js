@@ -295,7 +295,7 @@ export default {
         camera.attachControl(canvas, true);
         camera.setPosition(new BABYLON.Vector3(10, 6, -20));
         camera.lowerRadiusLimit = 15;
-        camera.upperRadiusLimit = 35;
+        camera.upperRadiusLimit = 85;
         camera.wheelDeltaPercentage = 0.01;
 
         store.commit("experiment/SET_CAMERA", camera);

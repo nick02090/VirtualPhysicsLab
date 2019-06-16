@@ -275,12 +275,28 @@ const actions = {
         let scene = state.scene;
         let ground = state.ground;
 
+        var roofWall = new BABYLON.MeshBuilder.CreateGround("roofWall", {
+            width: 20 * ground.scaling.x,
+            height: 20 * ground.scaling.z
+        }, scene);
+        roofWall.position.y = 20 * ground.scaling.z - 1;
+        roofWall.physicsImpostor = new BABYLON.PhysicsImpostor(
+            roofWall,
+            BABYLON.PhysicsImpostor.BoxImpostor, {
+                mass: 0,
+                friction: ground.physicsImpostor.friction,
+                restitution: ground.physicsImpostor.restitution
+            },
+            scene
+        );
+        roofWall.visibility = false;
+
         var northWall = new BABYLON.MeshBuilder.CreateGround("northWall", {
             width: 20 * ground.scaling.x,
             height: 20 * ground.scaling.z
         }, scene);
         northWall.position.z = 10 * ground.scaling.z;
-        northWall.position.y = 9;
+        northWall.position.y = 10 * ground.scaling.z - 1;
         northWall.rotation.x = -Math.PI / 2;
         northWall.physicsImpostor = new BABYLON.PhysicsImpostor(
             northWall,
@@ -297,7 +313,7 @@ const actions = {
             height: 20 * ground.scaling.z
         }, scene);
         westWall.position.x = -10 * ground.scaling.x;
-        westWall.position.y = 9;
+        westWall.position.y = 10 * ground.scaling.z - 1;
         westWall.rotation.z = -Math.PI / 2;
         westWall.physicsImpostor = new BABYLON.PhysicsImpostor(
             westWall,
@@ -314,7 +330,7 @@ const actions = {
             height: 20 * ground.scaling.z
         }, scene);
         eastWall.position.x = 10 * ground.scaling.x;
-        eastWall.position.y = 9;
+        eastWall.position.y = 10 * ground.scaling.z - 1;
         eastWall.rotation.z = Math.PI / 2;
         eastWall.physicsImpostor = new BABYLON.PhysicsImpostor(
             eastWall,
@@ -331,7 +347,7 @@ const actions = {
             height: 20 * ground.scaling.z
         }, scene);
         southWall.position.z = -10 * ground.scaling.z;
-        southWall.position.y = 9;
+        southWall.position.y = 10 * ground.scaling.z - 1;
         southWall.rotation.x = Math.PI / 2;
         southWall.physicsImpostor = new BABYLON.PhysicsImpostor(
             southWall,
@@ -343,7 +359,7 @@ const actions = {
             scene);
         southWall.visibility = false;
 
-        commit(types.SET_WALLS, [northWall, westWall, eastWall, southWall])
+        commit(types.SET_WALLS, [roofWall, northWall, westWall, eastWall, southWall])
     },
     deleteWalls({
         state,
